@@ -1,14 +1,5 @@
-config.properties
-*.data
-*.txt
-*.bat
-*.cmd
-*.jar
-data
 .idea/workspace.xml
 .idea/tasks.xml
-META-INF
-*.bat
 out
 
 # Windows image file caches
