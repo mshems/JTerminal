@@ -1,16 +1,13 @@
 import javax.swing.*;
 import java.awt.*;
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Terminal implements TerminalEventListener{
     private Dimension windowSize = new Dimension(800, 600);
-    TerminalInput terminalInput;
+    private TerminalInputComponent inputComponent;
     private JFrame frame;
-    boolean waiting = false;
-    CommandHandler commandHandler;
-    LinkedBlockingQueue<String> commandQueue;
+    private CommandHandler commandHandler;
+    private LinkedBlockingQueue<String> commandQueue;
 
     public Terminal(String title){
         this.commandHandler = new CommandHandler(this);
@@ -22,64 +19,62 @@ public class Terminal implements TerminalEventListener{
         this.frame = new JFrame(title);
         this.frame.setSize(windowSize);
         this.frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        terminalInput = new TerminalInput();
-        this.frame.add(terminalInput);
-        terminalInput.setTerminalEventListener(this);
+        inputComponent = new TerminalInputComponent();
+        this.frame.add(inputComponent);
+        inputComponent.setTerminalEventListener(this);
     }
 
     public synchronized void start(){
-        terminalInput.start();
+        inputComponent.start();
         this.frame.setVisible(true);
          while(true) {
              try {
-                 if (commandQueue.isEmpty()) {
-                     wait();
+                 wait();
+                 if (!commandQueue.isEmpty()) {
                      commandHandler.processCommand(commandQueue.take());
+                     inputComponent.advance();
                  }
              } catch (InterruptedException e) {
-
+                //e.printStackTrace();
              }
          }
     }
 
-    public synchronized String query(String prompt){
-        System.out.println(">>>>QUERYING");
-        String s=null;
-        terminalInput.setPrompt(prompt);
-        terminalInput.prompt();
-        System.out.println(">>BEGIN WAITING FOR SUBMIT");
-        this.waiting = true;
-        terminalInput.waiting=true;
+    public void print(String s){
+        inputComponent.append("\n"+s);
+    }
 
+    public synchronized String query(String query){
+        String s=null;
+        inputComponent.setPrompt(query);
+        inputComponent.advance();
+        inputComponent.setQuerying(true);
         synchronized (this) {
            try{
                this.wait();
-               System.out.println(">>DONE WAITING");
-               s = terminalInput.getCommand();
-               terminalInput.setPrompt(terminalInput.DEFAULT_PROMPT);
-               terminalInput.advance();
-           }catch (InterruptedException e){
-
+               s = inputComponent.getCommand();
+               inputComponent.resetPrompt();
+           }catch (InterruptedException ex){
+                ex.printStackTrace();
            }
         }
-        System.out.println(">>>>QUERY COMPLETE");
         return s;
     }
 
     @Override
     public synchronized void submitActionPerformed(SubmitEvent e) {
-        System.out.println(">>SUBMIT EVENT RECEIVED");
-        if(waiting){
-            waiting = false;
-            this.notifyAll();
-        } else {
-            try {
-                commandQueue.put(e.commandString);
-                terminalInput.updateHistory(e.commandString);
-                notifyAll();
-            }catch (InterruptedException ex){
-
-            }
+        this.notifyAll();
+        try {
+            commandQueue.put(e.commandString);
+            //System.out.println(commandQueue.toString());
+            inputComponent.updateHistory(e.commandString);
+        }catch (InterruptedException ex){
+            //ex.printStackTrace();
         }
+    }
+
+    @Override
+    public synchronized void queryActionPerformed(QueryEvent e) {
+        this.notifyAll();
     }
 }

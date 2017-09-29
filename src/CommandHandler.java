@@ -27,6 +27,5 @@ public class CommandHandler {
                 break;
         }
         this.tokens.clear();
-        parent.terminalInput.advance();
     }
 }

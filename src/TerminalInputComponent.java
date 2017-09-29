@@ -4,58 +4,37 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 
-public class TerminalInput extends JTextArea{
+public class TerminalInputComponent extends JTextArea{
     private TerminalEventListener listener;
-    int lastPromptPos;
-    boolean allowBackSpace = true;
-    boolean multiline = false;
-    String prompt = "test@cterm > ";
-    static final String DEFAULT_PROMPT = "test@cterm > ";
-    boolean waiting = false;
+    private int lastPromptPos;
+    private boolean allowBackSpace = true;
+    private boolean multiline;
+    private boolean querying = false;
+    private String prompt;
+    private static final String DEFAULT_PROMPT = "user@terminal > ";
     private LinkedList<String> history;
     private int historyPointer = 0;
 
-    public TerminalInput(){
+    public TerminalInputComponent(){
         this.setMargin(new Insets(5,5,5,5));
         this.setBackground(Color.BLACK);
         this.setForeground(Color.WHITE);
         this.setCaretColor(Color.WHITE);
         this.setFont(new Font("MONOSPACED", Font.PLAIN, 19));
-
-        remapEnterKey();
-        remapArrows();
+        this.setPrompt(DEFAULT_PROMPT);
+        this.setMultiline(true);
+        this.remapEnterKey();
+        this.remapArrows();
         this.history = new LinkedList<>();
         this.addKeyListener(new TerminalKeylistener(this));
     }
 
-    synchronized void fireEvent(SubmitEvent e){
-        //System.out.println(">>FIRING SUBMIT EVENT");
-        if(listener!=null){ //&& !waiting){
-            //advance();
-            listener.submitActionPerformed(e);
-        }
-    }
-
-    void setTerminalEventListener(TerminalEventListener listener){
-        this.listener = listener;
-    }
-
-    public void start(){
+    void start(){
         this.setEditable(true);
         this.setText(DEFAULT_PROMPT);
         this.advanceCaret();
     }
-    public void setPrompt(String prompt){
-        this.prompt = prompt;
-    }
-    public String getCommand(){
-        return this.getText().substring(lastPromptPos);
-    }
 
-    void advanceCaret(){
-        this.lastPromptPos = getText().lastIndexOf(prompt)+prompt.length();
-        this.setCaretPosition(lastPromptPos);
-    }
     void advance(){
         if(multiline) {
             this.appendPrompt();
@@ -65,13 +44,22 @@ public class TerminalInput extends JTextArea{
         this.advanceCaret();
     }
 
-    void appendPrompt(){
-        this.append("\n" + prompt);
+    public String getCommand(){
+        return this.getText().substring(lastPromptPos);
+    }
+
+    void advanceCaret(){
+        this.lastPromptPos = getText().lastIndexOf(getPrompt())+getPrompt().length();
+        this.setCaretPosition(lastPromptPos);
+    }
+
+    private void appendPrompt(){
+        this.append("\n" + getPrompt());
         this.advanceCaret();
     }
 
-    void prompt(){
-        this.setText(prompt);
+    private void prompt(){
+        this.setText(getPrompt());
         this.advanceCaret();
     }
 
@@ -85,6 +73,24 @@ public class TerminalInput extends JTextArea{
         }
         history.addFirst(command);
         historyPointer = 0;
+    }
+
+    void fireEvent(SubmitEvent e){
+        //System.out.println(">>FIRING SUBMIT EVENT");
+        if(listener!=null){
+            listener.submitActionPerformed(e);
+        }
+    }
+
+    void fireEvent(QueryEvent e){
+        //System.out.println(">>FIRING QUERY SUBMIT EVENT");
+        if(listener!=null){
+            listener.queryActionPerformed(e);
+        }
+    }
+
+    void setTerminalEventListener(TerminalEventListener listener){
+        this.listener = listener;
     }
 
     void disableBackSpace(){
@@ -138,5 +144,49 @@ public class TerminalInput extends JTextArea{
             }
         });
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)), "downArrowAction");
+    }
+
+    public String getPrompt() {
+        return prompt;
+    }
+
+    public void setPrompt(String prompt){
+        this.prompt = prompt;
+    }
+
+    public void resetPrompt(){
+        this.prompt = DEFAULT_PROMPT;
+    }
+
+    public boolean isMultiline() {
+        return multiline;
+    }
+
+    public void setMultiline(boolean multiline) {
+        this.multiline = multiline;
+    }
+
+    public int getLastPromptPos() {
+        return lastPromptPos;
+    }
+
+    public void setLastPromptPos(int lastPromptPos) {
+        this.lastPromptPos = lastPromptPos;
+    }
+
+    public boolean isAllowBackSpace() {
+        return allowBackSpace;
+    }
+
+    public void setAllowBackSpace(boolean allowBackSpace) {
+        this.allowBackSpace = allowBackSpace;
+    }
+
+    public boolean isQuerying() {
+        return querying;
+    }
+
+    public void setQuerying(boolean querying) {
+        this.querying = querying;
     }
 }
