@@ -6,7 +6,8 @@ public class Main {
         terminal.start();
     }
 
-    public static void newPerson(){
-        terminal.query("First Name? ");
+    public synchronized static void newPerson(){
+        String name = terminal.query("First Name? ");
+        System.out.println(name);
     }
 }

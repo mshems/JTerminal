@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.LinkedList;
 
 public class TerminalInput extends JTextArea{
     private TerminalEventListener listener;
@@ -11,6 +12,8 @@ public class TerminalInput extends JTextArea{
     String prompt = "test@cterm > ";
     static final String DEFAULT_PROMPT = "test@cterm > ";
     boolean waiting = false;
+    private LinkedList<String> history;
+    private int historyPointer = 0;
 
     public TerminalInput(){
         this.setMargin(new Insets(5,5,5,5));
@@ -21,14 +24,14 @@ public class TerminalInput extends JTextArea{
 
         remapEnterKey();
         remapArrows();
-
+        this.history = new LinkedList<>();
         this.addKeyListener(new TerminalKeylistener(this));
     }
 
     synchronized void fireEvent(SubmitEvent e){
         //System.out.println(">>FIRING SUBMIT EVENT");
-        if(listener!=null){
-            advance();
+        if(listener!=null){ //&& !waiting){
+            //advance();
             listener.submitActionPerformed(e);
         }
     }
@@ -42,7 +45,7 @@ public class TerminalInput extends JTextArea{
         this.setText(DEFAULT_PROMPT);
         this.advanceCaret();
     }
-    public synchronized void setPrompt(String prompt){
+    public void setPrompt(String prompt){
         this.prompt = prompt;
     }
     public String getCommand(){
@@ -76,6 +79,14 @@ public class TerminalInput extends JTextArea{
         this.setText("");
     }
 
+    void updateHistory(String command){
+        if(history.size()>=25){
+            history.removeLast();
+        }
+        history.addFirst(command);
+        historyPointer = 0;
+    }
+
     void disableBackSpace(){
         this.allowBackSpace = false;
         this.getInputMap().put(KeyStroke.getKeyStroke("BACK_SPACE"), "none");
@@ -101,5 +112,31 @@ public class TerminalInput extends JTextArea{
             }
         });
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "leftArrowAction");
+
+        //UP ARROW
+        this.getActionMap().put("upArrowAction", new AbstractAction(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                if(!history.isEmpty() && historyPointer < history.size()){
+                    historyPointer++;
+                    setText(getText().substring(0,lastPromptPos)+history.get(historyPointer-1));
+                }
+            }
+        });
+        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0)), "upArrowAction");
+
+        //DOWN ARROW
+        this.getActionMap().put("downArrowAction", new AbstractAction(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                if(historyPointer > 1 ){
+                    historyPointer--;
+                    setText(getText().substring(0,lastPromptPos)+history.get(historyPointer-1));
+                } else if(historyPointer == 1){
+                    setText(getText().substring(0,lastPromptPos)+"");
+                }
+            }
+        });
+        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)), "downArrowAction");
     }
 }

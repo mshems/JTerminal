@@ -30,7 +30,7 @@ public class TerminalKeylistener implements KeyListener {
             }
         }
         if(e.getKeyCode() == KeyEvent.VK_ENTER){
-            //System.out.println("event created");
+//            System.out.println("submit!");
             parent.fireEvent(new SubmitEvent(parent, SUBMIT_EVENT_ID, "submit-event", parent.getCommand()));
         }
     }
