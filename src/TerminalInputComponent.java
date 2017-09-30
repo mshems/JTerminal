@@ -6,6 +6,7 @@ import java.util.LinkedList;
 
 public class TerminalInputComponent extends JTextArea{
     private TerminalEventListener listener;
+    //private TerminalEventDispatcher eventDispatcher;
     private int lastPromptPos;
     private boolean allowBackSpace = true;
     private boolean multiline;
@@ -20,13 +21,14 @@ public class TerminalInputComponent extends JTextArea{
         this.setBackground(Color.BLACK);
         this.setForeground(Color.WHITE);
         this.setCaretColor(Color.WHITE);
-        this.setFont(new Font("MONOSPACED", Font.PLAIN, 19));
+        this.setFont(new Font("MONOSPACED", Font.PLAIN, 18));
         this.setPrompt(DEFAULT_PROMPT);
         this.setMultiline(true);
         this.remapEnterKey();
         this.remapArrows();
         this.history = new LinkedList<>();
         this.addKeyListener(new TerminalKeylistener(this));
+        //this.eventDispatcher = new TerminalEventDispatcher(this);
     }
 
     void start(){
@@ -76,22 +78,17 @@ public class TerminalInputComponent extends JTextArea{
     }
 
     void fireEvent(SubmitEvent e){
-        //System.out.println(">>FIRING SUBMIT EVENT");
         if(listener!=null){
             listener.submitActionPerformed(e);
         }
     }
 
     void fireEvent(QueryEvent e){
-        //System.out.println(">>FIRING QUERY SUBMIT EVENT");
         if(listener!=null){
             listener.queryActionPerformed(e);
         }
     }
 
-    void setTerminalEventListener(TerminalEventListener listener){
-        this.listener = listener;
-    }
 
     void disableBackSpace(){
         this.allowBackSpace = false;
@@ -189,4 +186,20 @@ public class TerminalInputComponent extends JTextArea{
     public void setQuerying(boolean querying) {
         this.querying = querying;
     }
+
+    void setTerminalEventListener(TerminalEventListener listener){
+        this.listener = listener;
+    }
+
+    TerminalEventListener getTerminalEventListener() {
+        return this.listener;
+    }
+
+    /*public TerminalEventDispatcher getEventDispatcher() {
+        return eventDispatcher;
+    }
+
+    public void setEventDispatcher(TerminalEventDispatcher eventDispatcher) {
+        this.eventDispatcher = eventDispatcher;
+    }*/
 }

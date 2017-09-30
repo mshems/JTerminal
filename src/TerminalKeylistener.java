@@ -2,12 +2,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class TerminalKeylistener implements KeyListener {
-    private TerminalInputComponent parent;
-
+    private TerminalInputComponent inputComponent;
     private static final int SUBMIT_EVENT_ID = 1;
 
-    public TerminalKeylistener(TerminalInputComponent parent){
-        this.parent = parent;
+    public TerminalKeylistener(TerminalInputComponent inputComponent){
+        this.inputComponent = inputComponent;
     }
 
     @Override
@@ -17,24 +16,26 @@ public class TerminalKeylistener implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(parent.getCaretPosition() < parent.getPrompt().length() && e.getKeyCode() != KeyEvent.VK_RIGHT){
-            parent.advanceCaret();
+        if(inputComponent.getCaretPosition() < inputComponent.getPrompt().length() && e.getKeyCode() != KeyEvent.VK_RIGHT){
+            inputComponent.advanceCaret();
         }
         if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE){
-            if(parent.getCaretPosition() <= parent.getLastPromptPos()){
-                parent.disableBackSpace();
+            if(inputComponent.getCaretPosition() <= inputComponent.getLastPromptPos()){
+                inputComponent.disableBackSpace();
             } else {
-                if(!parent.isAllowBackSpace()){
-                    parent.enableBackSpace();
+                if(!inputComponent.isAllowBackSpace()){
+                    inputComponent.enableBackSpace();
                 }
             }
         }
         if(e.getKeyCode() == KeyEvent.VK_ENTER){
-            if(parent.isQuerying()){
-                parent.fireEvent(new QueryEvent(parent, SUBMIT_EVENT_ID, "submit-event", parent.getCommand()));
-                parent.setQuerying(false);
+            if(inputComponent.isQuerying()){
+                //inputComponent.getEventDispatcher().fireEvent(new QueryEvent(inputComponent, SUBMIT_EVENT_ID, "submit-event", inputComponent.getCommand()));
+                inputComponent.fireEvent(new QueryEvent(inputComponent, SUBMIT_EVENT_ID, "submit-event", inputComponent.getCommand()));
+                inputComponent.setQuerying(false);
             } else {
-                parent.fireEvent(new SubmitEvent(parent, SUBMIT_EVENT_ID, "submit-event", parent.getCommand()));
+                //inputComponent.getEventDispatcher().fireEvent(new SubmitEvent(inputComponent, SUBMIT_EVENT_ID, "submit-event", inputComponent.getCommand()));
+                inputComponent.fireEvent(new SubmitEvent(inputComponent, SUBMIT_EVENT_ID, "submit-event", inputComponent.getCommand()));
             }
         }
     }
