@@ -1,3 +1,5 @@
+package terminal;
+
 public class TerminalEventDispatcher {
     private TerminalInputComponent inputComponent;
     private TerminalEventListener inputListener;

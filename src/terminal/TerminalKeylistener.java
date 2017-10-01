@@ -1,3 +1,5 @@
+package terminal;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -30,11 +32,11 @@ public class TerminalKeylistener implements KeyListener {
         }
         if(e.getKeyCode() == KeyEvent.VK_ENTER){
             if(inputComponent.isQuerying()){
-                //inputComponent.getEventDispatcher().fireEvent(new QueryEvent(inputComponent, SUBMIT_EVENT_ID, "submit-event", inputComponent.getCommand()));
+                //inputComponent.getEventDispatcher().fireEvent(new terminal.QueryEvent(inputComponent, SUBMIT_EVENT_ID, "submit-event", inputComponent.getCommand()));
                 inputComponent.fireEvent(new QueryEvent(inputComponent, SUBMIT_EVENT_ID, "submit-event", inputComponent.getCommand()));
                 inputComponent.setQuerying(false);
             } else {
-                //inputComponent.getEventDispatcher().fireEvent(new SubmitEvent(inputComponent, SUBMIT_EVENT_ID, "submit-event", inputComponent.getCommand()));
+                //inputComponent.getEventDispatcher().fireEvent(new terminal.SubmitEvent(inputComponent, SUBMIT_EVENT_ID, "submit-event", inputComponent.getCommand()));
                 inputComponent.fireEvent(new SubmitEvent(inputComponent, SUBMIT_EVENT_ID, "submit-event", inputComponent.getCommand()));
             }
         }

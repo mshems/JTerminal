@@ -1,4 +1,4 @@
-import java.awt.event.ActionEvent;
+package terminal;
 
 public interface TerminalEventListener {
     void submitActionPerformed(SubmitEvent e);
