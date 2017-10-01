@@ -37,7 +37,7 @@ public class CommandHandler {
                 Main.bool();
                 break;
             case "quit":
-                if(terminal.queryYN("Are you sure? [Y/N] ")) {
+                if(terminal.queryYN("Are you sure? [Y/N] : ")) {
                     System.exit(0);
                 }
                 break;

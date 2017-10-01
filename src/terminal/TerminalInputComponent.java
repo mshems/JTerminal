@@ -1,3 +1,8 @@
+/**
+ * Creator: Matthew Shems
+ *
+ */
+
 package terminal;
 
 import javax.swing.*;
@@ -8,16 +13,16 @@ import java.util.LinkedList;
 
 public class TerminalInputComponent extends JTextArea{
     private TerminalEventListener listener;
-    //private terminal.TerminalEventDispatcher eventDispatcher;
-    private int lastPromptPos;
-    private boolean allowBackSpace = true;
+    private boolean allowBackSpace;
     private boolean multiline;
-    private boolean querying = false;
+    private boolean querying;
+    private int lastPromptPos;
+
     private String prompt;
-    private static final String DEFAULT_PROMPT = "user@terminal > ";
+    private static final String USER_NAME = System.getProperty("user.name");
+    private static final String DEFAULT_PROMPT = USER_NAME+"@terminal > ";
     private LinkedList<String> history;
     private int historyPointer = 0;
-    private boolean onBlankLine = true;
 
 
     public TerminalInputComponent(){
@@ -32,11 +37,14 @@ public class TerminalInputComponent extends JTextArea{
         this.remapArrows();
         this.history = new LinkedList<>();
         this.addKeyListener(new TerminalKeylistener(this));
+        this.setQuerying(false);
+        this.setAllowBackSpace(false);
         //this.eventDispatcher = new terminal.TerminalEventDispatcher(this);
     }
 
     void start(){
         this.setEditable(true);
+        this.println("-------- Terminal --------");
         this.prompt();
         this.advanceCaret();
     }
@@ -47,13 +55,12 @@ public class TerminalInputComponent extends JTextArea{
 
     void print(String s){
         this.append(s);
-        this.advanceCaret();
-        this.onBlankLine = false;
+        //this.advanceCaret();
     }
 
     void println(String s){
         this.append(s+System.lineSeparator());
-        this.advanceCaret();
+        //this.advanceCaret();
     }
 
     void newLine(){
@@ -62,7 +69,6 @@ public class TerminalInputComponent extends JTextArea{
         } else {
             this.clear();
         }
-        onBlankLine = true;
     }
 
     void advance(){
@@ -72,7 +78,6 @@ public class TerminalInputComponent extends JTextArea{
             this.prompt();
         }
         this.advanceCaret();
-        onBlankLine = false;
     }
 
     void advanceCaret(){
@@ -116,7 +121,6 @@ public class TerminalInputComponent extends JTextArea{
             listener.queryActionPerformed(e);
         }
     }
-
 
     void disableBackSpace(){
         this.allowBackSpace = false;
@@ -215,27 +219,11 @@ public class TerminalInputComponent extends JTextArea{
         this.querying = querying;
     }
 
-    void setTerminalEventListener(TerminalEventListener listener){
+    public void setTerminalEventListener(TerminalEventListener listener){
         this.listener = listener;
     }
 
-    TerminalEventListener getTerminalEventListener() {
+    public TerminalEventListener getTerminalEventListener() {
         return this.listener;
-    }
-
-    /*public terminal.TerminalEventDispatcher getEventDispatcher() {
-        return eventDispatcher;
-    }
-
-    public void setEventDispatcher(terminal.TerminalEventDispatcher eventDispatcher) {
-        this.eventDispatcher = eventDispatcher;
-    }*/
-
-    public boolean isOnBlankLine() {
-        return onBlankLine;
-    }
-
-    public void setOnBlankLine(boolean onBlankLine) {
-        this.onBlankLine = onBlankLine;
     }
 }

@@ -4,13 +4,12 @@ public class Main {
     private static Terminal terminal;
 
     public static void main(String[] args){
-        terminal = new Terminal("terminal.Terminal v0.0.1");
+        terminal = new Terminal("Terminal v0.0.1");
         terminal.start();
     }
 
     public static void number(){
         int n = terminal.queryInteger("Enter an integer: ", false);
-        //double d = terminal.queryDouble("Enter a double: ", false);
         terminal.printBlock(() -> {
             terminal.print("Your integer is: ");
             terminal.print(n);

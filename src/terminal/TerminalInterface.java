@@ -1,9 +1,5 @@
 package terminal;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.concurrent.LinkedBlockingQueue;
-
 interface TerminalInterface{
     void initFrame(String title);
     void start();

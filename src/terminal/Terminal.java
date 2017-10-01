@@ -10,7 +10,6 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
     private JFrame frame;
     private CommandHandler commandHandler;
     private LinkedBlockingQueue<String> commandQueue;
-    private boolean inline;
 
     public Terminal(String title){
         commandHandler = new CommandHandler(this);
@@ -30,14 +29,13 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
 
     @Override
     public synchronized void start(){
-        inputComponent.start();
         frame.setVisible(true);
-         while(true) {
+        inputComponent.start();
+        while(true) {
              try {
                  wait();
                  if (!commandQueue.isEmpty()) {
                      commandHandler.processCommand(commandQueue.take());
-                     //inputComponent.advance();
                  }
              } catch (InterruptedException e) {
                 //e.printStackTrace();
@@ -55,17 +53,14 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
         inputComponent.newLine();
         terminalPrinter.printBlock();
     }
-
     public String makeQueryInline(){
         inputComponent.newLine();
         return "";
     }
-
     @Override
     public void printf(String format, Object... args){
         inputComponent.print(String.format(format, args));
     }
-
     @Override
     public void print(String s){
         inputComponent.print(s);
@@ -197,7 +192,6 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
         this.notifyAll();
         try {
             commandQueue.put(e.commandString);
-            //System.out.println(commandQueue.toString());
             inputComponent.updateHistory(e.commandString);
         }catch (InterruptedException ex){
             //ex.printStackTrace();
