@@ -2,26 +2,30 @@ package terminal;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Terminal implements TerminalEventListener, TerminalInterface{
-    private Dimension windowSize = new Dimension(800, 600);
+    private Dimension windowSize = new Dimension(850, 650);
     private TerminalInputComponent inputComponent;
     private JFrame frame;
     private CommandHandler commandHandler;
     private LinkedBlockingQueue<String> commandQueue;
+    private LinkedList<String> commandTokens;
 
-    private Color backgroundColor;
-    private Color foregroundColor;
-    private Color caretColor;
-    private Font textFont;
-
+    /**
+     * Create a new instance of a Terminal
+     */
     public Terminal(String title){
         commandHandler = new CommandHandler(this);
         commandQueue = new LinkedBlockingQueue<>();
+        commandTokens = new LinkedList<>();
         initFrame(title);
     }
 
+    /*
+     * Initialize the Terminal window
+     */
     @Override
     public void initFrame(String title){
         frame = new JFrame(title);
@@ -33,6 +37,9 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
         frame.add(scrollPane);
     }
 
+    /*
+     * Enable and start the Terminal
+     */
     @Override
     public synchronized void start(){
         frame.setVisible(true);
@@ -42,14 +49,17 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
                  wait();
                  if (!commandQueue.isEmpty()) {
                      commandHandler.processCommand(commandQueue.take());
-                     advance();
                  }
+                 advance();
              } catch (InterruptedException e) {
                 //e.printStackTrace();
              }
          }
     }
 
+    /*
+     * Wait for input, return the string entered
+     */
     @Override
     public synchronized String query(String queryPrompt){
         String s="";
@@ -68,10 +78,13 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
         return s.trim();
     }
 
+    /*
+     * Returns a string, may optionally allow empty string
+     */
     @Override
-    public String queryString(String query, boolean allowEmptyString){
+    public String queryString(String queryPrompt, boolean allowEmptyString){
         while(true) {
-            String s = query(query);
+            String s = query(queryPrompt);
             if (s.isEmpty() && allowEmptyString) {
                 return s;
             } else if (!s.isEmpty()){
@@ -81,9 +94,12 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
         }
     }
 
+    /*
+     * Returns true or false, matches 'y', 'yes', 'n', and 'no' (Not case-sensitive)
+     */
     @Override
-    public boolean queryYN(String query){
-        switch(query(query).toLowerCase()){
+    public boolean queryYN(String queryPrompt){
+        switch(query(queryPrompt).toLowerCase()){
             case "y":
             case "yes":
                 return true;
@@ -93,10 +109,10 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
     }
 
     @Override
-    public Integer queryInteger(String query, boolean allowNull){
+    public Integer queryInteger(String queryPrompt, boolean allowNull){
         while(true) {
             try {
-                return Integer.parseInt(query(query));
+                return Integer.parseInt(query(queryPrompt));
             } catch (NumberFormatException e) {
                 if(allowNull){
                     break;
@@ -108,10 +124,10 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
     }
 
     @Override
-    public Double queryDouble(String query, boolean allowNull) {
+    public Double queryDouble(String queryPrompt, boolean allowNull) {
         while (true) {
             try {
-                return Double.parseDouble(query(query));
+                return Double.parseDouble(query(queryPrompt));
             } catch (NumberFormatException e) {
                 if (allowNull) {
                     break;
@@ -123,9 +139,9 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
     }
 
     @Override
-    public Boolean queryBoolean(String query, boolean allowNull){
+    public Boolean queryBoolean(String queryPrompt, boolean allowNull){
         while(true) {
-            switch (query(query).toLowerCase()){
+            switch (query(queryPrompt).toLowerCase()){
                 case "t":
                 case "true":
                     return true;
@@ -155,8 +171,8 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
     public synchronized void submitActionPerformed(SubmitEvent e) {
         this.notifyAll();
         try {
-            commandQueue.put(e.commandString);
-            inputComponent.updateHistory(e.commandString);
+            commandQueue.put(e.inputString);
+            inputComponent.updateHistory(e.inputString);
             newLine();
         }catch (InterruptedException ex){
             //ex.printStackTrace();
@@ -183,6 +199,18 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
         inputComponent.print(s);
     }
 
+    public void putCommand(String key, TerminalCommand command){
+        commandHandler.putCommand(key, command);
+    }
+
+    public LinkedList<String> getCommandTokens() {
+        return commandTokens;
+    }
+
+    public void setCommandTokens(LinkedList<String> commandTokens) {
+        this.commandTokens = commandTokens;
+    }
+
     public void print(Integer n){
         inputComponent.print(n.toString());
     }
@@ -192,6 +220,8 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
     public void print(Boolean b){
         inputComponent.print(b.toString());
     }
+
+    @Override
     public void println(String s){
         inputComponent.println(s);
     }

@@ -7,11 +7,12 @@ interface TerminalInterface{
     void clear();
     void newLine();
     void printf(String format, Object... args);
-    void print(String s);
+    void print(String str);
+    void println(String str);
     String query(String queryPrompt);
-    String queryString(String query, boolean allowEmptyString);
-    boolean queryYN(String query);
-    Integer queryInteger(String query, boolean allowNull);
-    Boolean queryBoolean(String query, boolean allowNull);
-    Double queryDouble(String query, boolean allowNull);
+    String queryString(String queryPrompt, boolean allowEmptyString);
+    boolean queryYN(String queryPrompt);
+    Integer queryInteger(String queryPrompt, boolean allowNull);
+    Boolean queryBoolean(String queryPrompt, boolean allowNull);
+    Double queryDouble(String queryPrompt, boolean allowNull);
 }

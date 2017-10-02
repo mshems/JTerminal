@@ -1,10 +1,20 @@
-package terminal;
+import terminal.Terminal;
 
-public class Main {
+public class Testing {
     private static Terminal terminal;
 
     public static void main(String[] args){
         terminal = new Terminal("Terminal v0.0.1");
+
+        terminal.putCommand("print", ()->{
+            String s = terminal.queryString("Enter a string: ", false);
+            terminal.println("You entered: "+s);
+        });
+
+        terminal.putCommand("test", ()->{
+            terminal.println("test");
+        });
+
         terminal.start();
     }
 

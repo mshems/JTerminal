@@ -6,6 +6,7 @@
 package terminal;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -17,6 +18,7 @@ public class TerminalInputComponent extends JTextArea{
     private boolean multiline;
     private boolean querying;
     private int lastPromptPos;
+    private static final int MAXLINES = 256;
 
     private String currPrompt;
     private static final String USER_NAME = System.getProperty("user.name");
@@ -27,7 +29,7 @@ public class TerminalInputComponent extends JTextArea{
 
     public TerminalInputComponent(boolean multiline){
         this.history = new LinkedList<>();
-        this.addKeyListener(new TerminalKeylistener(this));
+        this.addKeyListener(new terminal.TerminalKeylistener(this));
         this.remapEnterKey();
         this.remapArrows();
 
@@ -35,7 +37,7 @@ public class TerminalInputComponent extends JTextArea{
         this.setBackground(new Color(33,33,33));
         this.setForeground(new Color(245,245,245));
         this.setCaretColor(new Color(245,245,245));
-        this.setFont(new Font("consolas", Font.PLAIN, 18));
+        this.setFont(new Font("consolas", Font.PLAIN, 17));
 
         this.multiline = multiline;
         this.currPrompt = DEFAULT_PROMPT;
@@ -66,6 +68,16 @@ public class TerminalInputComponent extends JTextArea{
     }
 
     void advance(){
+        if(this.getLineCount()>=MAXLINES){
+            int linesToRemove = this.getLineCount()-MAXLINES;
+            try {
+                this.replaceRange("",
+                        this.getLineStartOffset(0),
+                        this.getLineEndOffset(linesToRemove));
+            } catch (BadLocationException e){
+                e.printStackTrace();
+            }
+        }
         this.prompt();
         this.advanceCaret();
     }
