@@ -11,6 +11,11 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
     private CommandHandler commandHandler;
     private LinkedBlockingQueue<String> commandQueue;
 
+    private Color backgroundColor;
+    private Color foregroundColor;
+    private Color caretColor;
+    private Font textFont;
+
     public Terminal(String title){
         commandHandler = new CommandHandler(this);
         commandQueue = new LinkedBlockingQueue<>();
@@ -22,9 +27,10 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
         frame = new JFrame(title);
         frame.setSize(windowSize);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        inputComponent = new TerminalInputComponent();
-        frame.add(inputComponent);
+        inputComponent = new TerminalInputComponent(true);
         inputComponent.setTerminalEventListener(this);
+        JScrollPane scrollPane = new JScrollPane(inputComponent);
+        frame.add(scrollPane);
     }
 
     @Override
@@ -36,6 +42,7 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
                  wait();
                  if (!commandQueue.isEmpty()) {
                      commandHandler.processCommand(commandQueue.take());
+                     advance();
                  }
              } catch (InterruptedException e) {
                 //e.printStackTrace();
@@ -44,61 +51,10 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
     }
 
     @Override
-    public void advance(){
-        inputComponent.advance();
-    }
-
-    @Override
-    public void printBlock(TerminalPrinter terminalPrinter){
-        inputComponent.newLine();
-        terminalPrinter.printBlock();
-    }
-    public String makeQueryInline(){
-        inputComponent.newLine();
-        return "";
-    }
-    @Override
-    public void printf(String format, Object... args){
-        inputComponent.print(String.format(format, args));
-    }
-    @Override
-    public void print(String s){
-        inputComponent.print(s);
-    }
-    @Override
-    public void print(Integer n){
-        inputComponent.print(n.toString());
-    }
-    @Override
-    public void print(Double d){
-        inputComponent.print(d.toString());
-    }
-    @Override
-    public void print(Boolean b){
-        inputComponent.print(b.toString());
-    }
-    @Override
-    public void println(String s){
-        inputComponent.println(s);
-    }
-    @Override
-    public void println(Integer n){
-        inputComponent.println(n.toString());
-    }
-    @Override
-    public void println(Double d){
-        inputComponent.println(d.toString());
-    }
-    @Override
-    public void println(Boolean b){
-        inputComponent.println(b.toString());
-    }
-
-    @Override
-    public synchronized String getQueryResponse(String query){
+    public synchronized String query(String queryPrompt){
         String s="";
-        inputComponent.setPrompt(query);
-        inputComponent.advance();
+        inputComponent.setCurrPrompt(queryPrompt);
+        advance();
         inputComponent.setQuerying(true);
         synchronized (this) {
             try{
@@ -115,39 +71,52 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
     @Override
     public String queryString(String query, boolean allowEmptyString){
         while(true) {
-            String s = getQueryResponse(query);
+            String s = query(query);
             if (s.isEmpty() && allowEmptyString) {
                 return s;
             } else if (!s.isEmpty()){
                 return s;
             }
-
-            this.printBlock(() -> this.print("Please enter a string"));
+            println("Empty input not allowed");
         }
     }
 
     @Override
     public boolean queryYN(String query){
-        switch(getQueryResponse(query).toLowerCase()){
+        switch(query(query).toLowerCase()){
             case "y":
             case "yes":
                 return true;
             default:
                 return false;
         }
-
     }
 
     @Override
     public Integer queryInteger(String query, boolean allowNull){
         while(true) {
             try {
-                return Integer.parseInt(getQueryResponse(query));
+                return Integer.parseInt(query(query));
             } catch (NumberFormatException e) {
-                this.printBlock(() -> this.print("Not a valid integer"));
                 if(allowNull){
                     break;
                 }
+                println("Not an integer value");
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Double queryDouble(String query, boolean allowNull) {
+        while (true) {
+            try {
+                return Double.parseDouble(query(query));
+            } catch (NumberFormatException e) {
+                if (allowNull) {
+                    break;
+                }
+                println("Not a double value");
             }
         }
         return null;
@@ -156,7 +125,7 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
     @Override
     public Boolean queryBoolean(String query, boolean allowNull){
         while(true) {
-            switch (getQueryResponse(query).toLowerCase()){
+            switch (query(query).toLowerCase()){
                 case "t":
                 case "true":
                     return true;
@@ -167,24 +136,19 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
                     if(allowNull){
                         return null;
                     }
-                    this.printBlock(() -> this.print("Not a valid boolean"));
+                    println("Not a boolean value");
             }
         }
     }
 
     @Override
-    public Double queryDouble(String query, boolean allowNull) {
-        while (true) {
-            try {
-                return Double.parseDouble(getQueryResponse(query));
-            } catch (NumberFormatException e) {
-                this.printBlock(() -> this.print("Not a valid double"));
-                if (allowNull) {
-                    break;
-                }
-            }
-        }
-        return null;
+    public void advance(){
+        inputComponent.advance();
+    }
+
+    @Override
+    public void clear(){
+        inputComponent.clear();
     }
 
     @Override
@@ -193,6 +157,7 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
         try {
             commandQueue.put(e.commandString);
             inputComponent.updateHistory(e.commandString);
+            newLine();
         }catch (InterruptedException ex){
             //ex.printStackTrace();
         }
@@ -200,6 +165,43 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
 
     @Override
     public synchronized void queryActionPerformed(QueryEvent e) {
+        newLine();
         this.notifyAll();
+    }
+
+    @Override
+    public void newLine(){
+        inputComponent.newLine();
+    }
+
+    @Override
+    public void printf(String format, Object... args){
+        inputComponent.print(String.format(format, args));
+    }
+    @Override
+    public void print(String s){
+        inputComponent.print(s);
+    }
+
+    public void print(Integer n){
+        inputComponent.print(n.toString());
+    }
+    public void print(Double d){
+        inputComponent.print(d.toString());
+    }
+    public void print(Boolean b){
+        inputComponent.print(b.toString());
+    }
+    public void println(String s){
+        inputComponent.println(s);
+    }
+    public void println(Integer n){
+        inputComponent.println(n.toString());
+    }
+    public void println(Double d){
+        inputComponent.println(d.toString());
+    }
+    public void println(Boolean b){
+        inputComponent.println(b.toString());
     }
 }

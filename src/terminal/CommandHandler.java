@@ -45,10 +45,9 @@ public class CommandHandler {
                 System.exit(0);
                 break;
             default:
-                terminal.printBlock(() -> terminal.print("You entered: '" + token + "'"));
+                terminal.print("You entered: '" + token + "'");
                 break;
         }
         this.tokens.clear();
-        terminal.advance();
     }
 }

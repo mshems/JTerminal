@@ -18,7 +18,7 @@ public class TerminalKeylistener implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(inputComponent.getCaretPosition() < inputComponent.getPrompt().length() && e.getKeyCode() != KeyEvent.VK_RIGHT){
+        if(inputComponent.getCaretPosition() < inputComponent.getCurrPrompt().length() && e.getKeyCode() != KeyEvent.VK_RIGHT){
             inputComponent.advanceCaret();
         }
         if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE){
