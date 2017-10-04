@@ -4,9 +4,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class TerminalKeylistener implements KeyListener {
-    private TerminalInputComponent inputComponent;
+    private TerminalIOComponent inputComponent;
 
-    public TerminalKeylistener(TerminalInputComponent inputComponent){
+    public TerminalKeylistener(TerminalIOComponent inputComponent){
         this.inputComponent = inputComponent;
     }
 
@@ -31,10 +31,10 @@ public class TerminalKeylistener implements KeyListener {
         }
         if(e.getKeyCode() == KeyEvent.VK_ENTER){
             if(inputComponent.isQuerying()){
-                inputComponent.fireEvent(new QueryEvent(inputComponent, 1, "query-event", inputComponent.getCommand()));
+                inputComponent.fireEvent(new QueryEvent(inputComponent, 1, "query-event", inputComponent.getInput()));
                 inputComponent.setQuerying(false);
             } else {
-                inputComponent.fireEvent(new SubmitEvent(inputComponent, 1, "submit-event", inputComponent.getCommand()));
+                inputComponent.fireEvent(new SubmitEvent(inputComponent, 1, "submit-event", inputComponent.getInput()));
             }
         }
     }

@@ -1,10 +1,10 @@
 package terminal;
 
 public class TerminalEventDispatcher {
-    private TerminalInputComponent inputComponent;
+    private TerminalIOComponent inputComponent;
     private TerminalEventListener inputListener;
 
-    public TerminalEventDispatcher(TerminalInputComponent inputComponent){
+    public TerminalEventDispatcher(TerminalIOComponent inputComponent){
         this.inputComponent = inputComponent;
         this.inputListener = this.inputComponent.getTerminalEventListener();
     }

@@ -4,7 +4,7 @@ public class Testing {
     private static Terminal terminal;
 
     public static void main(String[] args){
-        terminal = new Terminal("Terminal v0.0.1");
+        terminal = new Terminal("Terminal v0.0.1", true);
 
         terminal.putCommand("print", ()->{
             String s = terminal.queryString("Enter a string: ", false);
@@ -12,7 +12,9 @@ public class Testing {
         });
 
         terminal.putCommand("test", ()->{
-            terminal.println("test");
+            terminal.println("CENTERED TEXT",Terminal.CENTERED);
+            terminal.println("RIGHT ALIGNED TEXT",Terminal.RIGHT_ALIGNED);
+            //terminal.println("test");
         });
 
         terminal.start();
