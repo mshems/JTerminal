@@ -2,45 +2,71 @@ package terminal;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class Terminal implements TerminalEventListener, TerminalInterface{
+public class Terminal implements TerminalEventListener{
     private Dimension windowSize = new Dimension(850, 650);
-    private TerminalInputComponent inputComponent;
+    private TerminalIOComponent inputComponent;
+    private TerminalIOComponent outputComponent;
     private JFrame frame;
-    private CommandHandler commandHandler;
     private LinkedBlockingQueue<String> commandQueue;
     private LinkedList<String> commandTokens;
+    private CommandMap commandMap;
+
+    private boolean dualDisplay;
+
+    public static final int LEFT_ALIGNED = 0;
+    public static final int CENTERED = 1;
+    public static final int RIGHT_ALIGNED = 2;
 
     /**
      * Create a new instance of a Terminal
      */
-    public Terminal(String title){
-        commandHandler = new CommandHandler(this);
+    public Terminal(String title, boolean dualDisplay){
+        this.dualDisplay = dualDisplay;
         commandQueue = new LinkedBlockingQueue<>();
         commandTokens = new LinkedList<>();
+        commandMap = new CommandMap();
+        addDefaultCommands();
         initFrame(title);
+    }
+
+    private void addDefaultCommands(){
+        commandMap.put("", ()->{});
+        commandMap.put("clear", ()->this.clear());
     }
 
     /*
      * Initialize the Terminal window
      */
-    @Override
-    public void initFrame(String title){
+    private void initFrame(String title){
         frame = new JFrame(title);
         frame.setSize(windowSize);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        inputComponent = new TerminalInputComponent(true);
-        inputComponent.setTerminalEventListener(this);
-        JScrollPane scrollPane = new JScrollPane(inputComponent);
-        frame.add(scrollPane);
+        frame.setLayout(new BorderLayout());
+        JScrollPane scrollPane;
+        if(dualDisplay){
+            inputComponent = new TerminalIOComponent(false);
+            inputComponent.setTerminalEventListener(this);
+            outputComponent = new TerminalDisplayComponent();
+            outputComponent.setEditable(false);
+            scrollPane = new JScrollPane(outputComponent);
+            frame.add(scrollPane, BorderLayout.CENTER);
+            frame.add(inputComponent, BorderLayout.SOUTH);
+        } else {
+            inputComponent = new TerminalIOComponent(true);
+            inputComponent.setTerminalEventListener(this);
+            outputComponent = inputComponent;
+            scrollPane = new JScrollPane(inputComponent);
+            frame.add(scrollPane, BorderLayout.CENTER);
+        }
     }
 
     /*
      * Enable and start the Terminal
      */
-    @Override
     public synchronized void start(){
         frame.setVisible(true);
         inputComponent.start();
@@ -48,40 +74,56 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
              try {
                  wait();
                  if (!commandQueue.isEmpty()) {
-                     commandHandler.processCommand(commandQueue.take());
+                     tokenize(commandQueue.take());
+                     doCommand(commandTokens.peek());
+                     newLine();
                  }
-                 advance();
+                 inputComponent.advance();
              } catch (InterruptedException e) {
                 //e.printStackTrace();
+                 break;
              }
          }
+    }
+
+    private void tokenize(String command){
+        String[] input = command
+                .trim()
+                .split("\\s+");
+        Collections.addAll(commandTokens, input);
+    }
+
+    private void doCommand(String token){
+        TerminalCommand command = commandMap.get(token);
+        if(command != null) {
+            command.executeCommand();
+        } else {
+            println("Command '"+token+"' not found");
+        }
+        commandTokens.clear();
     }
 
     /*
      * Wait for input, return the string entered
      */
-    @Override
-    public synchronized String query(String queryPrompt){
+    private synchronized String query(String queryPrompt){
         String s="";
         inputComponent.setCurrPrompt(queryPrompt);
-        advance();
+        inputComponent.advance();
         inputComponent.setQuerying(true);
         synchronized (this) {
             try{
                 this.wait();
-                s = inputComponent.getCommand();
-                inputComponent.resetPrompt();
+                s = inputComponent.getInput();
             }catch (InterruptedException ex){
                 //ex.printStackTrace();
             }
         }
+        inputComponent.resetPrompt();
+        newLine();
         return s.trim();
     }
 
-    /*
-     * Returns a string, may optionally allow empty string
-     */
-    @Override
     public String queryString(String queryPrompt, boolean allowEmptyString){
         while(true) {
             String s = query(queryPrompt);
@@ -94,10 +136,6 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
         }
     }
 
-    /*
-     * Returns true or false, matches 'y', 'yes', 'n', and 'no' (Not case-sensitive)
-     */
-    @Override
     public boolean queryYN(String queryPrompt){
         switch(query(queryPrompt).toLowerCase()){
             case "y":
@@ -108,7 +146,6 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
         }
     }
 
-    @Override
     public Integer queryInteger(String queryPrompt, boolean allowNull){
         while(true) {
             try {
@@ -123,7 +160,6 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
         return null;
     }
 
-    @Override
     public Double queryDouble(String queryPrompt, boolean allowNull) {
         while (true) {
             try {
@@ -138,7 +174,6 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
         return null;
     }
 
-    @Override
     public Boolean queryBoolean(String queryPrompt, boolean allowNull){
         while(true) {
             switch (query(queryPrompt).toLowerCase()){
@@ -157,81 +192,95 @@ public class Terminal implements TerminalEventListener, TerminalInterface{
         }
     }
 
-    @Override
-    public void advance(){
-        inputComponent.advance();
-    }
-
-    @Override
-    public void clear(){
-        inputComponent.clear();
-    }
-
-    @Override
-    public synchronized void submitActionPerformed(SubmitEvent e) {
-        this.notifyAll();
-        try {
-            commandQueue.put(e.inputString);
-            inputComponent.updateHistory(e.inputString);
-            newLine();
-        }catch (InterruptedException ex){
-            //ex.printStackTrace();
-        }
-    }
-
-    @Override
-    public synchronized void queryActionPerformed(QueryEvent e) {
-        newLine();
-        this.notifyAll();
-    }
-
-    @Override
-    public void newLine(){
-        inputComponent.newLine();
-    }
-
-    @Override
-    public void printf(String format, Object... args){
-        inputComponent.print(String.format(format, args));
-    }
-    @Override
-    public void print(String s){
-        inputComponent.print(s);
-    }
-
     public void putCommand(String key, TerminalCommand command){
-        commandHandler.putCommand(key, command);
+        commandMap.put(key, command);
+    }
+
+    public void replaceCommand(String key, TerminalCommand command){
+        commandMap.replace(key, command);
+    }
+
+    public void removeCommand(String key, TerminalCommand command) {
+        commandMap.remove(key, command);
+    }
+
+    public void removeCommand(String key){
+        commandMap.remove(key);
     }
 
     public LinkedList<String> getCommandTokens() {
         return commandTokens;
     }
 
-    public void setCommandTokens(LinkedList<String> commandTokens) {
-        this.commandTokens = commandTokens;
+    private void newLine(){
+        inputComponent.newLine();
     }
 
+    private void clear(){
+        if(dualDisplay){
+            outputComponent.clear();
+        } else {
+            inputComponent.clear();
+        }
+    }
+
+    public void printf(String format, Object... args){
+        inputComponent.print(String.format(format, args));
+    }
+
+    public void println(String str, int PRINT_FORMAT){
+        switch (PRINT_FORMAT){
+            case Terminal.LEFT_ALIGNED:
+                outputComponent.print(str);
+                break;
+            case Terminal.CENTERED:
+                outputComponent.printCentered(str);
+                break;
+            case Terminal.RIGHT_ALIGNED:
+                outputComponent.printRightAligned(str);
+                break;
+            default:
+                outputComponent.print(str);
+                break;
+        }
+    }
+
+    public void print(String s){
+        outputComponent.print(s);
+    }
     public void print(Integer n){
-        inputComponent.print(n.toString());
+        outputComponent.print(n.toString());
     }
     public void print(Double d){
-        inputComponent.print(d.toString());
+        outputComponent.print(d.toString());
     }
     public void print(Boolean b){
-        inputComponent.print(b.toString());
+        outputComponent.print(b.toString());
     }
-
-    @Override
     public void println(String s){
-        inputComponent.println(s);
+        outputComponent.println(s);
     }
     public void println(Integer n){
-        inputComponent.println(n.toString());
+        outputComponent.println(n.toString());
     }
     public void println(Double d){
-        inputComponent.println(d.toString());
+        outputComponent.println(d.toString());
     }
     public void println(Boolean b){
-        inputComponent.println(b.toString());
+        outputComponent.println(b.toString());
+    }
+
+    public synchronized void submitActionPerformed(SubmitEvent e) {
+        this.notifyAll();
+        try {
+            commandQueue.put(e.inputString);
+            inputComponent.updateHistory(e.inputString);
+        }catch (InterruptedException ex){
+            //ex.printStackTrace();
+        }
+    }
+
+    public synchronized void queryActionPerformed(QueryEvent e) {
+        this.notifyAll();
     }
 }
