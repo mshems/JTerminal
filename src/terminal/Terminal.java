@@ -17,16 +17,12 @@ public class Terminal implements TerminalEventListener{
     private LinkedBlockingQueue<String> commandQueue;
     private LinkedList<String> commandTokens;
     private CommandMap commandMap;
-
     private boolean dualDisplay;
 
     public static final int LEFT_ALIGNED = 0;
     public static final int CENTERED = 1;
     public static final int RIGHT_ALIGNED = 2;
 
-    /**
-     * Create a new instance of a Terminal
-     */
     public Terminal(String title, boolean dualDisplay){
         this.dualDisplay = dualDisplay;
         commandQueue = new LinkedBlockingQueue<>();
@@ -173,21 +169,6 @@ public class Terminal implements TerminalEventListener{
         }
     }
 
-    public String queryFromList(String queryPrompt, String[] options, boolean caseSensitive, boolean requireMatch){
-        while(true){
-            String input = query(queryPrompt).trim();
-            for(String str:options){
-                if(caseSensitive && input.equals(str)){
-                    return input;
-                } else if(input.equalsIgnoreCase(str)){
-                    return input;
-                } else if(!requireMatch){
-                    return null;
-                }
-            }
-        }
-    }
-
     public boolean queryYN(String queryPrompt){
         switch(query(queryPrompt).toLowerCase()){
             case "y":
@@ -276,9 +257,6 @@ public class Terminal implements TerminalEventListener{
         }
     }
 
-    public void printf(String format, Object... args){
-        inputComponent.print(String.format(format, args));
-    }
 
     public void println(String str, int PRINT_FORMAT){
         switch (PRINT_FORMAT){
@@ -297,6 +275,9 @@ public class Terminal implements TerminalEventListener{
         }
     }
 
+    public void printf(String format, Object... args){
+        outputComponent.print(String.format(format, args));
+    }
     public void print(String s){
         outputComponent.print(s);
     }

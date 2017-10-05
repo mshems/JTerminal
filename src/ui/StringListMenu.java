@@ -10,14 +10,20 @@ public class StringListMenu extends ListMenu {
     private Terminal listener;
     private String[] strings;
     private JLabel[] labels;
-
     private int selection;
-    public static final int HORIZONTAL = 0;
-    public static final int VERTICAL = 1;
 
     private Color background = new Color(33,33,33);
     private Color foreground = new Color(245,245,245);
     private Color highlight = new Color(220, 220, 220);
+
+    public StringListMenu(Terminal listener, String[] strings){
+        this.listener = listener;
+        this.labels = new JLabel[strings.length];
+        this.strings = strings;
+        this.setAlignmentY(Component.TOP_ALIGNMENT);
+        initHorizontalMenu();
+        selectItem(0);
+    }
 
     public StringListMenu(Terminal listener, String[] strings, int direction){
         this.listener = listener;
@@ -38,11 +44,15 @@ public class StringListMenu extends ListMenu {
         this.setForeground(foreground);
         makeLabels();
         this.setLayout(new FlowLayout(FlowLayout.LEFT));
-        for(JLabel l:labels){
-            this.add(l);
+        for(int i=0; i<labels.length; i++){
+            this.add(labels[i]);
+            /*if(i<labels.length-1) {
+                JLabel divider  = new JLabel("|");
+                divider.setForeground(foreground);
+                this.add(divider);
+            }*/
         }
     }
-
 
     private void initVerticalMenu(){
         this.setBorder(BorderFactory.createLineBorder(background, 5));

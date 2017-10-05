@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: out/production/terminal/terminal
+Main-Class: terminal.Testing
+

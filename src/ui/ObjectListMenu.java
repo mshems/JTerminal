@@ -13,9 +13,6 @@ public class ObjectListMenu<E> extends ListMenu<E> {
     private Map<String,  E> itemMap;
     private int selection;
 
-    public static final int HORIZONTAL = 0;
-    public static final int VERTICAL = 1;
-
     private Color background = new Color(33,33,33);
     private Color foreground = new Color(245,245,245);
     private Color highlight = new Color(220, 220, 220);
