@@ -1,4 +1,7 @@
 import terminal.Terminal;
+import ui.ObjectListMenu;
+
+import java.util.LinkedHashMap;
 
 public class Testing {
     private static Terminal terminal;
@@ -14,9 +17,24 @@ public class Testing {
         terminal.putCommand("test", ()->{
             terminal.println("CENTERED TEXT",Terminal.CENTERED);
             terminal.println("RIGHT ALIGNED TEXT",Terminal.RIGHT_ALIGNED);
-            //terminal.println("test");
         });
 
+        terminal.putCommand("menu", ()->{
+            LinkedHashMap<String, String> map = new LinkedHashMap<>();
+            map.put("key1", "value1");
+            map.put("key2", "value2");
+            map.put("key3", "value3");
+            map.put("key4", "value4");
+            terminal.queryObjectListMenu(map, ObjectListMenu.HORIZONTAL);
+            terminal.queryStringListMenu(new String[]{"key1","key2","key3","key4"}, ObjectListMenu.VERTICAL);
+        });
+
+        terminal.putCommand("list", ()->{
+            String str = terminal.queryFromList("[ a | b | c | cancel ] : ", new String[]{"1", "2", "3","cancel"}, false, true);
+            if(!str.equalsIgnoreCase("cancel")) {
+                terminal.println("Your choice: " + str);
+            }
+        });
         terminal.start();
     }
 

@@ -1,15 +1,18 @@
 package terminal;
 
+import ui.*;
+
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Terminal implements TerminalEventListener{
     private Dimension windowSize = new Dimension(850, 650);
     private TerminalIOComponent inputComponent;
     private TerminalIOComponent outputComponent;
+    private JScrollPane scrollPane;
+    private JPanel scrollPanel;
     private JFrame frame;
     private LinkedBlockingQueue<String> commandQueue;
     private LinkedList<String> commandTokens;
@@ -46,22 +49,23 @@ public class Terminal implements TerminalEventListener{
         frame.setSize(windowSize);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
-        JScrollPane scrollPane;
+        scrollPanel = new JPanel();
+        scrollPanel.setLayout(new BoxLayout(scrollPanel, BoxLayout.Y_AXIS));
         if(dualDisplay){
             inputComponent = new TerminalIOComponent(false);
             inputComponent.setTerminalEventListener(this);
             outputComponent = new TerminalDisplayComponent();
+            scrollPanel.add(outputComponent, BorderLayout.CENTER);
             outputComponent.setEditable(false);
-            scrollPane = new JScrollPane(outputComponent);
-            frame.add(scrollPane, BorderLayout.CENTER);
+            scrollPane = new JScrollPane(scrollPanel);
             frame.add(inputComponent, BorderLayout.SOUTH);
         } else {
             inputComponent = new TerminalIOComponent(true);
             inputComponent.setTerminalEventListener(this);
             outputComponent = inputComponent;
             scrollPane = new JScrollPane(inputComponent);
-            frame.add(scrollPane, BorderLayout.CENTER);
         }
+        frame.add(scrollPane, BorderLayout.CENTER);
     }
 
     /*
@@ -107,32 +111,80 @@ public class Terminal implements TerminalEventListener{
      * Wait for input, return the string entered
      */
     private synchronized String query(String queryPrompt){
-        String s="";
+        String input="";
         inputComponent.setCurrPrompt(queryPrompt);
         inputComponent.advance();
         inputComponent.setQuerying(true);
         synchronized (this) {
             try{
                 this.wait();
-                s = inputComponent.getInput();
+                input = inputComponent.getInput();
             }catch (InterruptedException ex){
                 //ex.printStackTrace();
             }
         }
         inputComponent.resetPrompt();
         newLine();
-        return s.trim();
+        return input.trim();
+    }
+
+    private synchronized <E> E queryMenu(ListMenu<E> menu){
+        E obj = null;
+        MenuKeyListener menuKeyListener = new MenuKeyListener(menu);
+        inputComponent.removeTerminalKeyListener();
+        inputComponent.addKeyListener(menuKeyListener);
+        inputComponent.unmapArrows();
+        scrollPane.getViewport().remove(outputComponent);
+        scrollPane.getViewport().add(menu);
+        synchronized (this) {
+            try{
+                this.wait();
+                obj = menu.getSelectedItem();
+            }catch (InterruptedException ex){
+                //ex.printStackTrace();
+            }
+        }
+        inputComponent.removeKeyListener(menuKeyListener);
+        inputComponent.addTerminalKeyListener();
+        inputComponent.remapArrows();
+        scrollPane.getViewport().remove(menu);
+        scrollPane.getViewport().add(outputComponent);
+        return obj;
+    }
+
+    public synchronized <E> E queryObjectListMenu(Map<String, E> map, int direction){
+        ObjectListMenu<E> menu = new ObjectListMenu<E>(this, map, direction);
+        return queryMenu(menu);
+    }
+    public synchronized String queryStringListMenu(String[] strings, int direction){
+        StringListMenu menu = new StringListMenu(this, strings , direction);
+        return (String) queryMenu(menu);
     }
 
     public String queryString(String queryPrompt, boolean allowEmptyString){
         while(true) {
-            String s = query(queryPrompt);
-            if (s.isEmpty() && allowEmptyString) {
-                return s;
-            } else if (!s.isEmpty()){
-                return s;
+            String input = query(queryPrompt);
+            if (input.isEmpty() && allowEmptyString) {
+                return input;
+            } else if (!input.isEmpty()){
+                return input;
             }
             println("Empty input not allowed");
+        }
+    }
+
+    public String queryFromList(String queryPrompt, String[] options, boolean caseSensitive, boolean requireMatch){
+        while(true){
+            String input = query(queryPrompt).trim();
+            for(String str:options){
+                if(caseSensitive && input.equals(str)){
+                    return input;
+                } else if(input.equalsIgnoreCase(str)){
+                    return input;
+                } else if(!requireMatch){
+                    return null;
+                }
+            }
         }
     }
 
@@ -282,5 +334,13 @@ public class Terminal implements TerminalEventListener{
 
     public synchronized void queryActionPerformed(QueryEvent e) {
         this.notifyAll();
+    }
+
+    public synchronized void menuActionPerformed(MenuEvent e){
+        this.notifyAll();
+    }
+
+    public TerminalIOComponent getInputComponent() {
+        return inputComponent;
     }
 }

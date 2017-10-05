@@ -10,6 +10,7 @@ import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.LinkedList;
 
 public class TerminalIOComponent extends JTextArea{
@@ -19,6 +20,7 @@ public class TerminalIOComponent extends JTextArea{
     private boolean querying;
     private int lastPromptPos;
     private static final int MAXLINES = 256;
+    private TerminalKeylistener terminalKeylistener;
 
     private String currPrompt;
     private static final String USER_NAME = System.getProperty("user.name");
@@ -30,7 +32,8 @@ public class TerminalIOComponent extends JTextArea{
 
     public TerminalIOComponent(boolean multiline){
         this.history = new LinkedList<>();
-        this.addKeyListener(new terminal.TerminalKeylistener(this));
+        terminalKeylistener = new TerminalKeylistener(this);
+        this.addKeyListener(terminalKeylistener);
         this.remapEnterKey();
         this.remapArrows();
 
@@ -165,7 +168,7 @@ public class TerminalIOComponent extends JTextArea{
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)), "");
     }
 
-    private void remapArrows(){
+    public void remapArrows(){
         //LEFT ARROW
         this.getActionMap().put("leftArrowAction", new AbstractAction(){
             @Override
@@ -176,6 +179,18 @@ public class TerminalIOComponent extends JTextArea{
             }
         });
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "leftArrowAction");
+
+        //RIGHT ARROW
+        this.getActionMap().put("rightArrowAction", new AbstractAction(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                if(getCaretPosition() < getText().length()){
+                    setCaretPosition(getCaretPosition()+1);
+                }
+            }
+        });
+        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0)), "rightArrowAction");
+
 
         //UP ARROW
         this.getActionMap().put("upArrowAction", new AbstractAction(){
@@ -202,6 +217,21 @@ public class TerminalIOComponent extends JTextArea{
             }
         });
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)), "downArrowAction");
+    }
+
+    public void unmapArrows(){
+        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)), "");
+        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0)), "");
+        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "");
+        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "");
+    }
+
+    public void removeTerminalKeyListener(){
+        this.removeKeyListener(terminalKeylistener);
+    }
+
+    public void addTerminalKeyListener(){
+        this.addKeyListener(terminalKeylistener);
     }
 
     public String getCurrPrompt() {

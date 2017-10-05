@@ -3,7 +3,7 @@ package terminal;
 import java.awt.event.ActionEvent;
 
 public class SubmitEvent extends ActionEvent {
-    String inputString;
+    public String inputString;
 
     public SubmitEvent(Object source, int id, String commandID, String inputString ) {
         super(source, id, commandID);
