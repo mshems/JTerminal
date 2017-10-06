@@ -5,6 +5,8 @@ import terminal.Terminal;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.*;
 
 public class ObjectListMenu<E> extends ListMenu<E> {
@@ -21,7 +23,12 @@ public class ObjectListMenu<E> extends ListMenu<E> {
         this.listener = listener;
         this.labels = new LinkedList<>();
         this.itemMap = itemMap;
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.setAlignmentY(Component.TOP_ALIGNMENT);
+        this.setBorder(BorderFactory.createLineBorder(background, 5));
+        this.setBackground(background);
+        this.setForeground(foreground);
+
         if(direction==VERTICAL){
             initVerticalMenu();
         } else {
@@ -31,25 +38,37 @@ public class ObjectListMenu<E> extends ListMenu<E> {
     }
 
     private void initHorizontalMenu(){
-        this.setBorder(BorderFactory.createLineBorder(background, 5));
-        this.setBackground(background);
-        this.setForeground(foreground);
+        JTextArea textArea = new JTextArea();
+        textArea.setBackground(background);
+        textArea.setForeground(foreground);
+        textArea.setText(listener.getOutputComponent().getText());
+        textArea.setFont(new Font("consolas", Font.PLAIN, 17));
+        textArea.setEditable(false);
+        textArea.setFocusable(false);
+
+        JPanel labelPanel = new JPanel();
+        labelPanel.setBackground(background);
+        labelPanel.setForeground(foreground);
+
         makeLabels();
-        this.setLayout(new FlowLayout(FlowLayout.LEFT));
+        labelPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         for(JLabel l:labels){
-            this.add(l);
+            labelPanel.add(l);
         }
+        this.add(textArea);
+        this.add(labelPanel);
     }
 
     private void initVerticalMenu(){
-        this.setBorder(BorderFactory.createLineBorder(background, 5));
-        this.setBackground(background);
-        this.setForeground(foreground);
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        JPanel labelPanel = new JPanel();
+        labelPanel.setBackground(background);
+        labelPanel.setForeground(foreground);
         makeLabels();
+        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
         for(JLabel l:labels){
-            this.add(l);
+            labelPanel.add(l);
         }
+        this.add(labelPanel, Component.LEFT_ALIGNMENT);
     }
 
     private void makeLabels(){

@@ -42,7 +42,7 @@ public class Terminal implements TerminalEventListener{
      */
     private void initFrame(String title){
         frame = new JFrame(title);
-        frame.setSize(windowSize);
+        frame.setMinimumSize(windowSize);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
         scrollPanel = new JPanel();
@@ -59,9 +59,11 @@ public class Terminal implements TerminalEventListener{
             inputComponent = new TerminalIOComponent(true);
             inputComponent.setTerminalEventListener(this);
             outputComponent = inputComponent;
-            scrollPane = new JScrollPane(inputComponent);
+            scrollPanel.add(inputComponent);
+            scrollPane = new JScrollPane(scrollPanel);
         }
         frame.add(scrollPane, BorderLayout.CENTER);
+        frame.pack();
     }
 
     /*
@@ -76,7 +78,7 @@ public class Terminal implements TerminalEventListener{
                  if (!commandQueue.isEmpty()) {
                      tokenize(commandQueue.take());
                      doCommand(commandTokens.peek());
-                     newLine();
+                     //newLine();
                  }
                  inputComponent.advance();
              } catch (InterruptedException e) {
@@ -98,6 +100,7 @@ public class Terminal implements TerminalEventListener{
         if(command != null) {
             command.executeCommand();
         } else {
+            newLine();
             println("Command '"+token+"' not found");
         }
         commandTokens.clear();
@@ -130,8 +133,13 @@ public class Terminal implements TerminalEventListener{
         inputComponent.removeTerminalKeyListener();
         inputComponent.addKeyListener(menuKeyListener);
         inputComponent.unmapArrows();
-        scrollPane.getViewport().remove(outputComponent);
-        scrollPane.getViewport().add(menu);
+        scrollPane.setViewportView(menu);
+        scrollPane.getViewport().setViewPosition(new Point(0,scrollPane.getViewport().getExtentSize().height));
+        //scrollPane.
+        if(!dualDisplay) {
+            menu.addKeyListener(menuKeyListener);
+            menu.requestFocusInWindow();
+        }
         synchronized (this) {
             try{
                 this.wait();
@@ -143,8 +151,8 @@ public class Terminal implements TerminalEventListener{
         inputComponent.removeKeyListener(menuKeyListener);
         inputComponent.addTerminalKeyListener();
         inputComponent.remapArrows();
-        scrollPane.getViewport().remove(menu);
-        scrollPane.getViewport().add(outputComponent);
+        scrollPane.setViewportView(outputComponent);
+        outputComponent.requestFocusInWindow();
         return obj;
     }
 
@@ -323,5 +331,8 @@ public class Terminal implements TerminalEventListener{
 
     public TerminalIOComponent getInputComponent() {
         return inputComponent;
+    }
+    public TerminalIOComponent getOutputComponent() {
+        return outputComponent;
     }
 }

@@ -59,7 +59,8 @@ public class TerminalIOComponent extends JTextArea{
     }
 
     private boolean isOnNewLine(){
-        return this.getText().endsWith(System.lineSeparator());
+        //System.out.println("on new line");
+        return (this.getText().endsWith(System.lineSeparator()) || this.getText().endsWith("\n"));
     }
 
     void newLine(){

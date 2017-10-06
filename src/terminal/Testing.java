@@ -27,7 +27,7 @@ public class Testing {
         });
 
         terminal.putCommand("menu", ()->{
-            menu();
+            //menu();
             terminal.queryStringListMenu(new String[]{"key1","key2","key3","key4"}, ListMenu.HORIZONTAL);
         });
 
@@ -40,7 +40,8 @@ public class Testing {
         map.put("key2", "value2");
         map.put("key3", "value3");
         map.put("key4", "value4");
-        terminal.queryObjectListMenu(map, ListMenu.VERTICAL);
+        terminal.queryObjectListMenu(map, ListMenu.HORIZONTAL);
+        //terminal.queryObjectListMenu(map, ListMenu.VERTICAL);
     }
 
     public static void number(){
