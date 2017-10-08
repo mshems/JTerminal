@@ -25,6 +25,8 @@ public class TerminalIOComponent extends JTextArea{
     private String currPrompt;
     private static final String USER_NAME = System.getProperty("user.name");
     private static final String DEFAULT_PROMPT = USER_NAME+"@terminal ~ ";
+
+    private String defaultPrompt;
     private LinkedList<String> history;
     private int historyPointer = 0;
 
@@ -43,7 +45,8 @@ public class TerminalIOComponent extends JTextArea{
         this.setCaretColor(new Color(245,245,245));
         this.setFont(new Font("consolas", Font.PLAIN, 17));
         this.multiline = multiline;
-        this.currPrompt = DEFAULT_PROMPT;
+        this.defaultPrompt = DEFAULT_PROMPT;
+        this.currPrompt = defaultPrompt;
         this.querying = false;
         this.allowBackSpace = false;
     }
@@ -245,6 +248,10 @@ public class TerminalIOComponent extends JTextArea{
 
     public void resetPrompt(){
         this.currPrompt = DEFAULT_PROMPT;
+    }
+
+    public void setDefaultPrompt(String prompt){
+        this.defaultPrompt = prompt;
     }
 
     public boolean isMultiline() {

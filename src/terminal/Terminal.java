@@ -87,18 +87,6 @@ public class Terminal implements TerminalEventListener{
         Collections.addAll(commandTokens, input);
     }
 
-    /*private void doCommand(String token){
-        TerminalCommand command = commandMap.get(token);
-        if(command != null) {
-            newLine();
-            command.executeCommand();
-        } else {
-            newLine();
-            println("Command '"+token+"' not found");
-        }
-        commandTokens.clear();
-    }*/
-
     private synchronized String query(String queryPrompt){
         String input="";
         inputComponent.setCurrPrompt(queryPrompt);
@@ -185,28 +173,6 @@ public class Terminal implements TerminalEventListener{
         }
     }
 
-    public void putCommand(String key, TerminalCommand command){
-        commandMap.put(key, command);
-    }
-
-    public void replaceCommand(String key, TerminalCommand command){
-        commandMap.replace(key, command);
-    }
-
-    public void removeCommand(String key, TerminalCommand command) {
-        commandMap.remove(key, command);
-    }
-
-    public void removeCommand(String key){
-        commandMap.remove(key);
-    }
-    public TerminalCommand getCommand(String key){
-        return this.commandMap.get(key);
-    }
-    public LinkedList<String> getCommandTokens() {
-        return commandTokens;
-    }
-
     public void newLine(){
         inputComponent.newLine();
     }
@@ -218,7 +184,6 @@ public class Terminal implements TerminalEventListener{
             inputComponent.clear();
         }
     }
-
 
     public void println(String str, int PRINT_FORMAT){
         switch (PRINT_FORMAT){
@@ -294,5 +259,27 @@ public class Terminal implements TerminalEventListener{
     }
     public TerminalIOComponent getOutputComponent() {
         return outputComponent;
+    }
+    public void setDefaultPrompt(String prompt){
+        inputComponent.setDefaultPrompt(prompt);
+        inputComponent.setCurrPrompt(prompt);
+    }
+    public void putCommand(String key, TerminalCommand command){
+        commandMap.put(key, command);
+    }
+    public void replaceCommand(String key, TerminalCommand command){
+        commandMap.replace(key, command);
+    }
+    public void removeCommand(String key, TerminalCommand command) {
+        commandMap.remove(key, command);
+    }
+    public void removeCommand(String key){
+        commandMap.remove(key);
+    }
+    public TerminalCommand getCommand(String key){
+        return this.commandMap.get(key);
+    }
+    public LinkedList<String> getCommandTokens() {
+        return commandTokens;
     }
 }
