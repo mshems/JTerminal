@@ -4,9 +4,11 @@ public class Testing {
     private static Terminal terminal;
 
     public static void main(String[] args){
-        terminal = new Terminal("Terminal v0.0.2", false);
+        terminal = new Terminal("Terminal v0.0.2", true);
 
         terminal.putCommand("print", ()->{
+            String s = terminal.queryString("Enter a string: ", false);
+            terminal.println("You entered: "+s);
         });
 
         terminal.putCommand("align", ()->{

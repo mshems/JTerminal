@@ -9,8 +9,6 @@ public class Terminal implements TerminalEventListener{
     private Dimension windowSize = new Dimension(850, 650);
     private TerminalIOComponent inputComponent;
     private TerminalIOComponent outputComponent;
-    private JScrollPane scrollPane;
-    private JPanel scrollPanel;
     private JFrame frame;
     private LinkedBlockingQueue<String> commandQueue;
     private LinkedList<String> commandTokens;
@@ -24,6 +22,7 @@ public class Terminal implements TerminalEventListener{
     public static final int LEFT_ALIGNED = 0;
     public static final int CENTERED = 1;
     public static final int RIGHT_ALIGNED = 2;
+
 
     public Terminal(String title, boolean dualDisplay){
         this.dualDisplay = dualDisplay;
@@ -39,41 +38,28 @@ public class Terminal implements TerminalEventListener{
         commandMap.put("clear", ()->this.clear());
     }
 
-    /*
-     * Initialize the Terminal window
-     */
     private void initFrame(String title){
         frame = new JFrame(title);
         frame.setMinimumSize(windowSize);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
-        frame.setBackground(background);
-
-        scrollPanel = new JPanel();
-        scrollPanel.setLayout(new BoxLayout(scrollPanel, BoxLayout.Y_AXIS));
 
         if(dualDisplay){
             inputComponent = new TerminalIOComponent(false);
             inputComponent.setTerminalEventListener(this);
             outputComponent = new TerminalDisplayComponent();
-            scrollPanel.add(outputComponent, BorderLayout.CENTER);
-            outputComponent.setEditable(false);
             frame.add(inputComponent, BorderLayout.SOUTH);
         } else {
             inputComponent = new TerminalIOComponent(true);
             inputComponent.setTerminalEventListener(this);
             outputComponent = inputComponent;
-            scrollPanel.add(inputComponent);
         }
 
-        scrollPane = new JScrollPane(scrollPanel);
+        JScrollPane scrollPane = new JScrollPane(outputComponent);
         frame.add(scrollPane, BorderLayout.CENTER);
         frame.pack();
     }
 
-    /*
-     * Enable and start the Terminal
-     */
     public synchronized void start(){
         frame.setVisible(true);
         inputComponent.start();
@@ -83,7 +69,6 @@ public class Terminal implements TerminalEventListener{
                  if (!commandQueue.isEmpty()) {
                      tokenize(commandQueue.take());
                      doCommand(commandTokens.peek());
-                     //newLine();
                  }
                  inputComponent.advance();
              } catch (InterruptedException e) {
@@ -111,9 +96,6 @@ public class Terminal implements TerminalEventListener{
         commandTokens.clear();
     }
 
-    /*
-     * Wait for input, return the string entered
-     */
     private synchronized String query(String queryPrompt){
         String input="";
         inputComponent.setCurrPrompt(queryPrompt);
