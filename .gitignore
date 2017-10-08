@@ -1,6 +1,7 @@
 .idea/workspace.xml
 .idea/tasks.xml
 out
+*.txt
 
 # Windows image file caches
 Thumbs.db

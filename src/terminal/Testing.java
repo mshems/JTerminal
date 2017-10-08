@@ -1,18 +1,12 @@
 package terminal;
 
-import ui.ListMenu;
-
-import java.util.LinkedHashMap;
-
 public class Testing {
     private static Terminal terminal;
 
     public static void main(String[] args){
-        terminal = new Terminal("Terminal v0.0.2", true);
+        terminal = new Terminal("Terminal v0.0.2", false);
 
         terminal.putCommand("print", ()->{
-            String s = terminal.queryString("Enter a string: ", false);
-            terminal.println("You entered: "+s);
         });
 
         terminal.putCommand("align", ()->{
@@ -26,22 +20,7 @@ public class Testing {
             newPerson();
         });
 
-        terminal.putCommand("menu", ()->{
-            //menu();
-            terminal.queryStringListMenu(new String[]{"key1","key2","key3","key4"}, ListMenu.HORIZONTAL);
-        });
-
         terminal.start();
-    }
-
-    public static void menu(){
-        LinkedHashMap<String, String> map = new LinkedHashMap<>();
-        map.put("key1", "value1");
-        map.put("key2", "value2");
-        map.put("key3", "value3");
-        map.put("key4", "value4");
-        terminal.queryObjectListMenu(map, ListMenu.HORIZONTAL);
-        //terminal.queryObjectListMenu(map, ListMenu.VERTICAL);
     }
 
     public static void number(){

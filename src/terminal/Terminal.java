@@ -1,7 +1,5 @@
 package terminal;
 
-import ui.*;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
@@ -18,6 +16,10 @@ public class Terminal implements TerminalEventListener{
     private LinkedList<String> commandTokens;
     private CommandMap commandMap;
     private boolean dualDisplay;
+
+    private static final Color background = new Color(33,33,33);
+    private static final  Color foreground = new Color(245,245,245);
+    private static final  Color highlight = new Color(220, 220, 220);
 
     public static final int LEFT_ALIGNED = 0;
     public static final int CENTERED = 1;
@@ -45,23 +47,26 @@ public class Terminal implements TerminalEventListener{
         frame.setMinimumSize(windowSize);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
+        frame.setBackground(background);
+
         scrollPanel = new JPanel();
         scrollPanel.setLayout(new BoxLayout(scrollPanel, BoxLayout.Y_AXIS));
+
         if(dualDisplay){
             inputComponent = new TerminalIOComponent(false);
             inputComponent.setTerminalEventListener(this);
             outputComponent = new TerminalDisplayComponent();
             scrollPanel.add(outputComponent, BorderLayout.CENTER);
             outputComponent.setEditable(false);
-            scrollPane = new JScrollPane(scrollPanel);
             frame.add(inputComponent, BorderLayout.SOUTH);
         } else {
             inputComponent = new TerminalIOComponent(true);
             inputComponent.setTerminalEventListener(this);
             outputComponent = inputComponent;
             scrollPanel.add(inputComponent);
-            scrollPane = new JScrollPane(scrollPanel);
         }
+
+        scrollPane = new JScrollPane(scrollPanel);
         frame.add(scrollPane, BorderLayout.CENTER);
         frame.pack();
     }
@@ -125,44 +130,6 @@ public class Terminal implements TerminalEventListener{
         inputComponent.resetPrompt();
         newLine();
         return input.trim();
-    }
-
-    private synchronized <E> E queryMenu(ListMenu<E> menu){
-        E obj = null;
-        MenuKeyListener menuKeyListener = new MenuKeyListener(menu);
-        inputComponent.removeTerminalKeyListener();
-        inputComponent.addKeyListener(menuKeyListener);
-        inputComponent.unmapArrows();
-        scrollPane.setViewportView(menu);
-        scrollPane.getViewport().setViewPosition(new Point(0,scrollPane.getViewport().getExtentSize().height));
-        //scrollPane.
-        if(!dualDisplay) {
-            menu.addKeyListener(menuKeyListener);
-            menu.requestFocusInWindow();
-        }
-        synchronized (this) {
-            try{
-                this.wait();
-                obj = menu.getSelectedItem();
-            }catch (InterruptedException ex){
-                //ex.printStackTrace();
-            }
-        }
-        inputComponent.removeKeyListener(menuKeyListener);
-        inputComponent.addTerminalKeyListener();
-        inputComponent.remapArrows();
-        scrollPane.setViewportView(outputComponent);
-        outputComponent.requestFocusInWindow();
-        return obj;
-    }
-
-    public synchronized <E> E queryObjectListMenu(Map<String, E> map, int direction){
-        ObjectListMenu<E> menu = new ObjectListMenu<E>(this, map, direction);
-        return queryMenu(menu);
-    }
-    public synchronized String queryStringListMenu(String[] strings, int direction){
-        StringListMenu menu = new StringListMenu(this, strings , direction);
-        return (String) queryMenu(menu);
     }
 
     public String queryString(String queryPrompt, boolean allowEmptyString){
