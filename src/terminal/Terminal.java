@@ -14,6 +14,7 @@ public class Terminal implements TerminalEventListener{
     private LinkedList<String> commandTokens;
     private CommandMap commandMap;
     private boolean dualDisplay;
+    private CommandExecutor commandExecutor;
 
     private static final Color background = new Color(33,33,33);
     private static final  Color foreground = new Color(245,245,245);
@@ -29,6 +30,7 @@ public class Terminal implements TerminalEventListener{
         commandQueue = new LinkedBlockingQueue<>();
         commandTokens = new LinkedList<>();
         commandMap = new CommandMap();
+        commandExecutor = new CommandExecutor();
         addDefaultCommands();
         initFrame(title);
     }
@@ -68,7 +70,7 @@ public class Terminal implements TerminalEventListener{
                  wait();
                  if (!commandQueue.isEmpty()) {
                      tokenize(commandQueue.take());
-                     doCommand(commandTokens.peek());
+                     commandExecutor.doCommand(this, commandTokens.peek());
                  }
                  inputComponent.advance();
              } catch (InterruptedException e) {
@@ -85,16 +87,17 @@ public class Terminal implements TerminalEventListener{
         Collections.addAll(commandTokens, input);
     }
 
-    private void doCommand(String token){
+    /*private void doCommand(String token){
         TerminalCommand command = commandMap.get(token);
         if(command != null) {
+            newLine();
             command.executeCommand();
         } else {
             newLine();
             println("Command '"+token+"' not found");
         }
         commandTokens.clear();
-    }
+    }*/
 
     private synchronized String query(String queryPrompt){
         String input="";
@@ -197,16 +200,18 @@ public class Terminal implements TerminalEventListener{
     public void removeCommand(String key){
         commandMap.remove(key);
     }
-
+    public TerminalCommand getCommand(String key){
+        return this.commandMap.get(key);
+    }
     public LinkedList<String> getCommandTokens() {
         return commandTokens;
     }
 
-    private void newLine(){
+    public void newLine(){
         inputComponent.newLine();
     }
 
-    private void clear(){
+    public void clear(){
         if(dualDisplay){
             outputComponent.clear();
         } else {
@@ -278,6 +283,12 @@ public class Terminal implements TerminalEventListener{
         this.notifyAll();
     }
 
+    public CommandMap getCommandMap() {
+        return commandMap;
+    }
+    public void setCommandExecutor(CommandExecutor commandExecutor){
+        this.commandExecutor = commandExecutor;
+    }
     public TerminalIOComponent getInputComponent() {
         return inputComponent;
     }
