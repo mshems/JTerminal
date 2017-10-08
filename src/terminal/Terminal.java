@@ -46,16 +46,16 @@ public class Terminal implements TerminalEventListener{
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
-        if(dualDisplay){
+        /*if(dualDisplay){
             inputComponent = new TerminalIOComponent(false);
             inputComponent.setTerminalEventListener(this);
             outputComponent = new TerminalDisplayComponent();
             frame.add(inputComponent, BorderLayout.SOUTH);
-        } else {
+        } else {*/
             inputComponent = new TerminalIOComponent(true);
             inputComponent.setTerminalEventListener(this);
             outputComponent = inputComponent;
-        }
+        //}
 
         JScrollPane scrollPane = new JScrollPane(outputComponent);
         frame.add(scrollPane, BorderLayout.CENTER);

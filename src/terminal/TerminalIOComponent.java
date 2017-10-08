@@ -10,7 +10,6 @@ import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.LinkedList;
 
 public class TerminalIOComponent extends JTextArea{
@@ -19,36 +18,32 @@ public class TerminalIOComponent extends JTextArea{
     private boolean multiline;
     private boolean querying;
     private int lastPromptPos;
-    private static final int MAXLINES = 256;
-    private TerminalKeylistener terminalKeylistener;
-
     private String currPrompt;
-    private static final String USER_NAME = System.getProperty("user.name");
-    private static final String DEFAULT_PROMPT = USER_NAME+"@terminal ~ ";
-
     private String defaultPrompt;
     private LinkedList<String> history;
     private int historyPointer = 0;
+    private static final int MAX_LINES = 256;
+
+    private static final String USER_NAME = System.getProperty("user.name");
+    private static final String DEFAULT_PROMPT = USER_NAME+"@terminal ~ ";
 
     public TerminalIOComponent(){}
 
-    public TerminalIOComponent(boolean multiline){
-        this.history = new LinkedList<>();
-        terminalKeylistener = new TerminalKeylistener(this);
-        this.addKeyListener(terminalKeylistener);
+    public TerminalIOComponent(boolean multi){
+        this.addKeyListener(new TerminalKeylistener(this));
         this.remapEnterKey();
         this.remapArrows();
-
         this.setMargin(new Insets(5,5,5,5));
         this.setBackground(new Color(33,33,33));
         this.setForeground(new Color(245,245,245));
         this.setCaretColor(new Color(245,245,245));
         this.setFont(new Font("consolas", Font.PLAIN, 17));
-        this.multiline = multiline;
-        this.defaultPrompt = DEFAULT_PROMPT;
-        this.currPrompt = defaultPrompt;
-        this.querying = false;
-        this.allowBackSpace = false;
+        history = new LinkedList<>();
+        multiline = multi;
+        defaultPrompt = DEFAULT_PROMPT;
+        currPrompt = defaultPrompt;
+        querying = false;
+        allowBackSpace = false;
     }
 
     void start(){
@@ -62,7 +57,6 @@ public class TerminalIOComponent extends JTextArea{
     }
 
     private boolean isOnNewLine(){
-        //System.out.println("on new line");
         return (this.getText().endsWith(System.lineSeparator()) || this.getText().endsWith("\n"));
     }
 
@@ -75,8 +69,8 @@ public class TerminalIOComponent extends JTextArea{
     }
 
     void advance(){
-        if(this.getLineCount()>=MAXLINES){
-            int linesToRemove = this.getLineCount()-MAXLINES;
+        if(this.getLineCount()>=MAX_LINES){
+            int linesToRemove = this.getLineCount()-MAX_LINES;
             try {
                 this.replaceRange("",
                         this.getLineStartOffset(0),
@@ -127,7 +121,7 @@ public class TerminalIOComponent extends JTextArea{
         for(int i=0; i<(width-1)/2; i++){
             str = " "+str+" ";
         }
-        println(str);
+        this.println(str);
     }
 
     void printRightAligned(String str){
@@ -135,7 +129,7 @@ public class TerminalIOComponent extends JTextArea{
         for(int i=0; i<width-1; i++){
             str = " "+str;
         }
-        println(str);
+        this.println(str);
     }
 
     void updateHistory(String command){
@@ -159,12 +153,12 @@ public class TerminalIOComponent extends JTextArea{
     }
 
     void disableBackSpace(){
-        this.allowBackSpace = false;
+        allowBackSpace = false;
         this.getInputMap().put(KeyStroke.getKeyStroke("BACK_SPACE"), "none");
     }
 
     void enableBackSpace(){
-        this.allowBackSpace = true;
+        allowBackSpace = true;
         this.getInputMap().put(KeyStroke.getKeyStroke("BACK_SPACE"), "delete-previous");
     }
 
@@ -223,21 +217,6 @@ public class TerminalIOComponent extends JTextArea{
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)), "downArrowAction");
     }
 
-    public void unmapArrows(){
-        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)), "");
-        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0)), "");
-        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "");
-        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "");
-    }
-
-    public void removeTerminalKeyListener(){
-        this.removeKeyListener(terminalKeylistener);
-    }
-
-    public void addTerminalKeyListener(){
-        this.addKeyListener(terminalKeylistener);
-    }
-
     public String getCurrPrompt() {
         return currPrompt;
     }
@@ -252,10 +231,6 @@ public class TerminalIOComponent extends JTextArea{
 
     public void setDefaultPrompt(String prompt){
         this.defaultPrompt = prompt;
-    }
-
-    public boolean isMultiline() {
-        return multiline;
     }
 
     public int getLastPromptPos() {
@@ -278,7 +253,4 @@ public class TerminalIOComponent extends JTextArea{
         this.listener = listener;
     }
 
-    public TerminalEventListener getTerminalEventListener() {
-        return this.listener;
-    }
 }
