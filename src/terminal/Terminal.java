@@ -25,8 +25,8 @@ public class Terminal implements TerminalEventListener{
     public static final int RIGHT_ALIGNED = 2;
 
 
-    public Terminal(String title, boolean dualDisplay){
-        this.dualDisplay = dualDisplay;
+    public Terminal(String title){
+        this.dualDisplay = false;
         commandQueue = new LinkedBlockingQueue<>();
         commandTokens = new LinkedList<>();
         commandMap = new CommandMap();

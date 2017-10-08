@@ -4,7 +4,7 @@ public class Testing {
     private static Terminal terminal;
 
     public static void main(String[] args){
-        terminal = new Terminal("Terminal v0.0.2", true);
+        terminal = new Terminal("Terminal v0.0.2");
 
         terminal.putCommand("print", ()->{
             String s = terminal.queryString("Enter a string: ", false);
