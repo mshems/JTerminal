@@ -3,6 +3,7 @@
 out
 *.txt
 src/terminal/Testing.java
+*.properties
 
 # Windows image file caches
 Thumbs.db
