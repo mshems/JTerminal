@@ -23,9 +23,10 @@ public class TerminalIOComponent extends JTextArea{
     private LinkedList<String> history;
     private int historyPointer = 0;
     private static final int MAX_LINES = 256;
+    private int fontSize = 17;
 
     private static final String USER_NAME = System.getProperty("user.name");
-    private static final String DEFAULT_PROMPT = USER_NAME+"@terminal ~ ";
+    private static final String DEFAULT_PROMPT = USER_NAME+" ~ ";
 
     public TerminalIOComponent(){}
 
@@ -34,10 +35,10 @@ public class TerminalIOComponent extends JTextArea{
         this.remapEnterKey();
         this.remapArrows();
         this.setMargin(new Insets(5,5,5,5));
-        this.setBackground(new Color(33,33,33));
-        this.setForeground(new Color(245,245,245));
-        this.setCaretColor(new Color(245,245,245));
-        this.setFont(new Font("consolas", Font.PLAIN, 17));
+        this.setBackground(Terminal.background_color);
+        this.setForeground(Terminal.foreground_color);
+        this.setCaretColor(Terminal.highlight_color);
+        this.setFont(new Font("consolas", Font.PLAIN, fontSize));
         history = new LinkedList<>();
         multiline = multi;
         defaultPrompt = DEFAULT_PROMPT;
@@ -95,7 +96,7 @@ public class TerminalIOComponent extends JTextArea{
         }
     }
 
-    void advanceCaret(){
+    private void advanceCaret(){
         this.lastPromptPos = getText().lastIndexOf(currPrompt) + currPrompt.length();
         this.setCaretPosition(lastPromptPos);
     }
@@ -166,7 +167,7 @@ public class TerminalIOComponent extends JTextArea{
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)), "");
     }
 
-    public void remapArrows(){
+    private void remapArrows(){
         //LEFT ARROW
         this.getActionMap().put("leftArrowAction", new AbstractAction(){
             @Override
@@ -217,6 +218,15 @@ public class TerminalIOComponent extends JTextArea{
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)), "downArrowAction");
     }
 
+    public int getFontSize() {
+        return fontSize;
+    }
+
+    public void setFontSize(int fontSize) {
+        this.fontSize = fontSize;
+        this.setFont(new Font("consolas", Font.PLAIN, fontSize));
+    }
+
     public String getCurrPrompt() {
         return currPrompt;
     }
@@ -252,5 +262,4 @@ public class TerminalIOComponent extends JTextArea{
     public void setTerminalEventListener(TerminalEventListener listener){
         this.listener = listener;
     }
-
 }
