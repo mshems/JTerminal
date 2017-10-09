@@ -236,7 +236,7 @@ public class TerminalIOComponent extends JTextArea{
     }
 
     public void resetPrompt(){
-        this.currPrompt = DEFAULT_PROMPT;
+        this.currPrompt = defaultPrompt;
     }
 
     public void setDefaultPrompt(String prompt){
