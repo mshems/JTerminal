@@ -15,12 +15,9 @@ public class Terminal implements TerminalEventListener {
     private CommandMap commandMap;
     private boolean dualDisplay;
     private CommandExecutor commandExecutor;
-
     private Properties properties;
 
-    public static final Color background_color = new Color(33, 33, 33);
-    public static final Color foreground_color = new Color(245, 245, 245);
-    public static final Color highlight_color = new Color(220, 220, 220);
+
 
     public static final int LEFT_ALIGNED = 0;
     public static final int CENTERED = 1;
@@ -28,6 +25,10 @@ public class Terminal implements TerminalEventListener {
 
 
     public Terminal(String title) {
+        TerminalTheme.addTheme("default", TerminalTheme.DEFAULT_THEME);
+        TerminalTheme.addTheme("dark", TerminalTheme.DARK_THEME);
+        TerminalTheme.addTheme("matrix", TerminalTheme.MATRIX_THEME);
+        TerminalTheme.addTheme("light", TerminalTheme.LIGHT_THEME);
         this.dualDisplay = false;
         commandQueue = new LinkedBlockingQueue<>();
         commandTokens = new LinkedList<>();
@@ -290,6 +291,12 @@ public class Terminal implements TerminalEventListener {
                     }
                 }
                 break;
+            case "color-theme":
+                if(!commandTokens.isEmpty()){
+                    String theme = commandTokens.pop().toLowerCase();
+                    setTheme(theme);
+                    properties.setProperty("color-theme", theme);
+                }
             default:
                 break;
         }
@@ -359,5 +366,14 @@ public class Terminal implements TerminalEventListener {
     public void setFontSize(int fontSize) {
         this.inputComponent.setFontSize(fontSize);
         this.outputComponent.setFontSize(fontSize);
+    }
+
+    public String getTheme(){
+        return outputComponent.getTheme();
+    }
+
+    public void setTheme(String theme){
+        this.inputComponent.setTheme(theme);
+        this.outputComponent.setTheme(theme);
     }
 }

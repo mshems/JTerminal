@@ -24,6 +24,7 @@ public class TerminalIOComponent extends JTextArea{
     private int historyPointer = 0;
     private static final int MAX_LINES = 256;
     private int fontSize = 17;
+    private String theme = "dark";
 
     private static final String USER_NAME = System.getProperty("user.name");
     private static final String DEFAULT_PROMPT = USER_NAME+" ~ ";
@@ -35,9 +36,15 @@ public class TerminalIOComponent extends JTextArea{
         this.remapEnterKey();
         this.remapArrows();
         this.setMargin(new Insets(5,5,5,5));
-        this.setBackground(Terminal.background_color);
-        this.setForeground(Terminal.foreground_color);
-        this.setCaretColor(Terminal.highlight_color);
+
+        Color[] theme_colors = TerminalTheme.getTheme(theme);
+        if(theme_colors==null){
+          theme_colors = TerminalTheme.DEFAULT_THEME;
+        }
+        this.setBackground(theme_colors[TerminalTheme.BACKGROUND_COLOR_INDEX]);
+        this.setForeground(theme_colors[TerminalTheme.FOREGROUND_COLOR_INDEX]);
+        this.setCaretColor(theme_colors[TerminalTheme.HIGHLIGHT_COLOR_INDEX]);
+
         this.setFont(new Font("consolas", Font.PLAIN, fontSize));
         history = new LinkedList<>();
         multiline = multi;
@@ -225,6 +232,22 @@ public class TerminalIOComponent extends JTextArea{
     public void setFontSize(int fontSize) {
         this.fontSize = fontSize;
         this.setFont(new Font("consolas", Font.PLAIN, fontSize));
+    }
+
+    public String getTheme() {
+        return theme;
+    }
+
+    public void setTheme(String theme) {
+        this.theme = theme;
+
+        Color[] theme_colors = TerminalTheme.getTheme(theme);
+        if(theme_colors==null){
+            theme_colors = TerminalTheme.DEFAULT_THEME;
+        }
+        this.setBackground(theme_colors[TerminalTheme.BACKGROUND_COLOR_INDEX]);
+        this.setForeground(theme_colors[TerminalTheme.FOREGROUND_COLOR_INDEX]);
+        this.setCaretColor(theme_colors[TerminalTheme.HIGHLIGHT_COLOR_INDEX]);
     }
 
     public String getCurrPrompt() {
