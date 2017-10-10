@@ -19,7 +19,7 @@ public class PropertyHandler {
                 out= new FileOutputStream(PATH);
 
                 properties.setProperty("font-size", "16");
-                properties.setProperty("color-theme", "dark");
+                //properties.setProperty("color-theme", "dark");
 
                 properties.store(out, null);
             } catch (IOException e){
@@ -50,7 +50,7 @@ public class PropertyHandler {
             } catch (NumberFormatException e){
                 //e.printStackTrace();
             }
-            terminal.setTheme(properties.getProperty("color-theme"));
+            //terminal.setTheme(properties.getProperty("color-theme"));
 
 
 
@@ -74,7 +74,7 @@ public class PropertyHandler {
             out = new FileOutputStream(PATH);
 
             properties.setProperty("font-size", Integer.toString(terminal.getFontSize()));
-            properties.setProperty("color-theme", terminal.getTheme());
+            //properties.setProperty("color-theme", terminal.getTheme());
 
             properties.store(out, null);
         } catch (IOException e){

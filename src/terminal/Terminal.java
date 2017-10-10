@@ -6,18 +6,15 @@ import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Terminal implements TerminalEventListener {
-    private Dimension windowSize = new Dimension(850, 650);
+    private Dimension windowSize = new Dimension(800, 600);
     private TerminalIOComponent inputComponent;
     private TerminalIOComponent outputComponent;
     private JFrame frame;
     private LinkedBlockingQueue<String> commandQueue;
     private LinkedList<String> commandTokens;
     private CommandMap commandMap;
-    private boolean dualDisplay;
     private CommandExecutor commandExecutor;
     private Properties properties;
-
-
 
     public static final int LEFT_ALIGNED = 0;
     public static final int CENTERED = 1;
@@ -25,11 +22,6 @@ public class Terminal implements TerminalEventListener {
 
 
     public Terminal(String title) {
-        TerminalTheme.addTheme("default", TerminalTheme.DEFAULT_THEME);
-        TerminalTheme.addTheme("dark", TerminalTheme.DARK_THEME);
-        TerminalTheme.addTheme("matrix", TerminalTheme.MATRIX_THEME);
-        TerminalTheme.addTheme("light", TerminalTheme.LIGHT_THEME);
-        this.dualDisplay = false;
         commandQueue = new LinkedBlockingQueue<>();
         commandTokens = new LinkedList<>();
         commandMap = new CommandMap();
@@ -40,23 +32,15 @@ public class Terminal implements TerminalEventListener {
         PropertyHandler.initProperties(this);
     }
 
-
     private void initGUI(String title) {
         frame = new JFrame(title);
         frame.setMinimumSize(windowSize);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
-        /*if(dualDisplay){
-            inputComponent = new TerminalIOComponent(false);
-            inputComponent.setTerminalEventListener(this);
-            outputComponent = new TerminalDisplayComponent();
-            frame.add(inputComponent, BorderLayout.SOUTH);
-        } else {*/
         inputComponent = new TerminalIOComponent(true);
         inputComponent.setTerminalEventListener(this);
         outputComponent = inputComponent;
-        //}
 
         JScrollPane scrollPane = new JScrollPane(outputComponent);
         frame.add(scrollPane, BorderLayout.CENTER);
@@ -95,7 +79,7 @@ public class Terminal implements TerminalEventListener {
 
     private synchronized String query(String queryPrompt) {
         String input = "";
-        inputComponent.setCurrPrompt(queryPrompt);
+        inputComponent.setPrompt(queryPrompt);
         inputComponent.advance();
         inputComponent.setQuerying(true);
         synchronized (this) {
@@ -179,16 +163,62 @@ public class Terminal implements TerminalEventListener {
         }
     }
 
-    public void newLine() {
+    void newLine() {
         inputComponent.newLine();
     }
 
-    public void clear() {
-        if (dualDisplay) {
-            outputComponent.clear();
-        } else {
-            inputComponent.clear();
+    private void clear(){
+        outputComponent.clear();
+    }
+
+    public void addDefaultCommands() {
+        commandMap.put("", () ->{});
+        commandMap.put("clear", this::clear);
+        commandMap.put("terminal-config", this::config);
+    }
+
+    public void removeDefaultCommands() {
+        commandMap.remove("");
+        commandMap.remove("clear");
+        commandMap.remove("terminal-config");
+    }
+
+    private void config() {
+        commandTokens.pop();
+        switch (commandTokens.pop()) {
+            case "font-size":
+                if(!commandTokens.isEmpty()) {
+                    try {
+                        int fontSize = Integer.parseInt(commandTokens.pop());
+                        setFontSize(fontSize);
+                        properties.setProperty("font-size", Integer.toString(fontSize));
+                    } catch (NumberFormatException e){
+                        e.printStackTrace();
+                    }
+                }
+                break;
+            default:
+                break;
         }
+        PropertyHandler.writeProperties(this);
+    }
+
+    public synchronized void submitActionPerformed(SubmitEvent e) {
+        this.notifyAll();
+        try {
+            commandQueue.put(e.inputString);
+            inputComponent.updateHistory(e.inputString);
+        } catch (InterruptedException ex) {
+            //ex.printStackTrace();
+        }
+    }
+
+    public synchronized void queryActionPerformed(QueryEvent e) {
+        this.notifyAll();
+    }
+
+    public synchronized void menuActionPerformed(MenuEvent e) {
+        this.notifyAll();
     }
 
     public void printf(String format, Object... args) {
@@ -252,63 +282,6 @@ public class Terminal implements TerminalEventListener {
         }
     }
 
-    public synchronized void submitActionPerformed(SubmitEvent e) {
-        this.notifyAll();
-        try {
-            commandQueue.put(e.inputString);
-            inputComponent.updateHistory(e.inputString);
-        } catch (InterruptedException ex) {
-            //ex.printStackTrace();
-        }
-    }
-
-    public synchronized void queryActionPerformed(QueryEvent e) {
-        this.notifyAll();
-    }
-
-    public synchronized void menuActionPerformed(MenuEvent e) {
-        this.notifyAll();
-    }
-
-    public void addDefaultCommands() {
-        commandMap.put("", () -> {
-        });
-        commandMap.put("clear", this::clear);
-        commandMap.put("terminal-config", this::config);
-    }
-
-    private void config() {
-        commandTokens.pop();
-        switch (commandTokens.pop()) {
-            case "font-size":
-                if(!commandTokens.isEmpty()) {
-                    try {
-                        int fontSize = Integer.parseInt(commandTokens.pop());
-                        setFontSize(fontSize);
-                        properties.setProperty("font-size", Integer.toString(fontSize));
-                    } catch (NumberFormatException e){
-                        e.printStackTrace();
-                    }
-                }
-                break;
-            case "color-theme":
-                if(!commandTokens.isEmpty()){
-                    String theme = commandTokens.pop().toLowerCase();
-                    setTheme(theme);
-                    properties.setProperty("color-theme", theme);
-                }
-            default:
-                break;
-        }
-        PropertyHandler.writeProperties(this);
-    }
-
-    public void removeDefaultCommands() {
-        commandMap.remove("");
-        commandMap.remove("clear");
-        commandMap.remove("terminal-config");
-    }
-
     public void putCommand(String key, TerminalCommand command) {
         commandMap.put(key, command);
     }
@@ -345,9 +318,20 @@ public class Terminal implements TerminalEventListener {
         return outputComponent;
     }
 
+    public String getDefaultPrompt(){
+        return inputComponent.getDefaultPrompt();
+    }
+
     public void setDefaultPrompt(String prompt) {
         inputComponent.setDefaultPrompt(prompt);
-        inputComponent.setCurrPrompt(prompt);
+    }
+
+    public String getPrompt(String prompt) {
+        return inputComponent.getPrompt();
+    }
+
+    public void setPrompt(String prompt) {
+        inputComponent.setPrompt(prompt);
     }
 
     public LinkedList<String> getCommandTokens() {
@@ -366,14 +350,5 @@ public class Terminal implements TerminalEventListener {
     public void setFontSize(int fontSize) {
         this.inputComponent.setFontSize(fontSize);
         this.outputComponent.setFontSize(fontSize);
-    }
-
-    public String getTheme(){
-        return outputComponent.getTheme();
-    }
-
-    public void setTheme(String theme){
-        this.inputComponent.setTheme(theme);
-        this.outputComponent.setTheme(theme);
     }
 }

@@ -18,18 +18,22 @@ public class TerminalIOComponent extends JTextArea{
     private boolean multiline;
     private boolean querying;
     private int lastPromptPos;
-    private String currPrompt;
+    private String prompt;
     private String defaultPrompt;
     private LinkedList<String> history;
     private int historyPointer = 0;
     private static final int MAX_LINES = 256;
     private int fontSize = 17;
-    private String theme = "dark";
 
     private static final String USER_NAME = System.getProperty("user.name");
     private static final String DEFAULT_PROMPT = USER_NAME+" ~ ";
 
-    public TerminalIOComponent(){}
+    public static final Color[] DEFAULT_THEME = new Color[]{
+            new Color(33, 33, 33),
+            new Color(245, 245, 245),
+            new Color(220, 220, 220)
+    };
+
 
     public TerminalIOComponent(boolean multi){
         this.addKeyListener(new TerminalKeylistener(this));
@@ -37,19 +41,15 @@ public class TerminalIOComponent extends JTextArea{
         this.remapArrows();
         this.setMargin(new Insets(5,5,5,5));
 
-        Color[] theme_colors = TerminalTheme.getTheme(theme);
-        if(theme_colors==null){
-          theme_colors = TerminalTheme.DEFAULT_THEME;
-        }
-        this.setBackground(theme_colors[TerminalTheme.BACKGROUND_COLOR_INDEX]);
-        this.setForeground(theme_colors[TerminalTheme.FOREGROUND_COLOR_INDEX]);
-        this.setCaretColor(theme_colors[TerminalTheme.HIGHLIGHT_COLOR_INDEX]);
+        this.setBackground(DEFAULT_THEME[0]);
+        this.setForeground(DEFAULT_THEME[1]);
+        this.setCaretColor(DEFAULT_THEME[2]);
 
         this.setFont(new Font("consolas", Font.PLAIN, fontSize));
         history = new LinkedList<>();
         multiline = multi;
         defaultPrompt = DEFAULT_PROMPT;
-        currPrompt = defaultPrompt;
+        prompt = defaultPrompt;
         querying = false;
         allowBackSpace = false;
     }
@@ -60,7 +60,7 @@ public class TerminalIOComponent extends JTextArea{
         this.advanceCaret();
     }
 
-    public String getInput(){
+    String getInput(){
         return this.getText().substring(lastPromptPos);
     }
 
@@ -94,17 +94,17 @@ public class TerminalIOComponent extends JTextArea{
     private void prompt(){
         if(multiline){
             if(this.isOnNewLine() || this.isClear()){
-                this.append(currPrompt);
+                this.append(prompt);
             } else {
-                this.append(System.lineSeparator() + currPrompt);
+                this.append(System.lineSeparator() + prompt);
             }
         } else {
-            this.setText(currPrompt);
+            this.setText(prompt);
         }
     }
 
     private void advanceCaret(){
-        this.lastPromptPos = getText().lastIndexOf(currPrompt) + currPrompt.length();
+        this.lastPromptPos = getText().lastIndexOf(prompt) + prompt.length();
         this.setCaretPosition(lastPromptPos);
     }
 
@@ -225,64 +225,52 @@ public class TerminalIOComponent extends JTextArea{
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)), "downArrowAction");
     }
 
-    public int getFontSize() {
+    int getFontSize() {
         return fontSize;
     }
 
-    public void setFontSize(int fontSize) {
+    void setFontSize(int fontSize) {
         this.fontSize = fontSize;
         this.setFont(new Font("consolas", Font.PLAIN, fontSize));
     }
 
-    public String getTheme() {
-        return theme;
+    String getPrompt() {
+        return prompt;
     }
 
-    public void setTheme(String theme) {
-        this.theme = theme;
-
-        Color[] theme_colors = TerminalTheme.getTheme(theme);
-        if(theme_colors==null){
-            theme_colors = TerminalTheme.DEFAULT_THEME;
-        }
-        this.setBackground(theme_colors[TerminalTheme.BACKGROUND_COLOR_INDEX]);
-        this.setForeground(theme_colors[TerminalTheme.FOREGROUND_COLOR_INDEX]);
-        this.setCaretColor(theme_colors[TerminalTheme.HIGHLIGHT_COLOR_INDEX]);
+    void setPrompt(String currPrompt){
+        this.prompt = currPrompt;
     }
 
-    public String getCurrPrompt() {
-        return currPrompt;
+    void resetPrompt(){
+        this.prompt = defaultPrompt;
     }
 
-    public void setCurrPrompt(String currPrompt){
-        this.currPrompt = currPrompt;
+    String getDefaultPrompt() {
+        return defaultPrompt;
     }
 
-    public void resetPrompt(){
-        this.currPrompt = defaultPrompt;
-    }
-
-    public void setDefaultPrompt(String prompt){
+    void setDefaultPrompt(String prompt){
         this.defaultPrompt = prompt;
     }
 
-    public int getLastPromptPos() {
+    int getLastPromptPos() {
         return lastPromptPos;
     }
 
-    public boolean isAllowBackSpace() {
+    boolean allowsBackspace() {
         return allowBackSpace;
     }
 
-    public boolean isQuerying() {
+    boolean isQuerying() {
         return querying;
     }
 
-    public void setQuerying(boolean querying) {
+    void setQuerying(boolean querying) {
         this.querying = querying;
     }
 
-    public void setTerminalEventListener(TerminalEventListener listener){
+    void setTerminalEventListener(TerminalEventListener listener){
         this.listener = listener;
     }
 }

@@ -24,7 +24,7 @@ public class TerminalKeylistener implements KeyListener {
             if(inputComponent.getCaretPosition() <= inputComponent.getLastPromptPos()){
                 inputComponent.disableBackSpace();
             } else {
-                if(!inputComponent.isAllowBackSpace()){
+                if(!inputComponent.allowsBackspace()){
                     inputComponent.enableBackSpace();
                 }
             }
