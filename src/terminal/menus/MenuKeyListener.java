@@ -1,7 +1,4 @@
-package terminal;
-
-import terminal.menus.MenuEvent;
-import terminal.menus.ListMenu;
+package terminal.menus;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;

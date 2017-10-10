@@ -21,7 +21,6 @@ public class ObjectListMenu<E> extends ListMenu<E> {
         this.labels = new LinkedList<>();
         this.itemMap = itemMap;
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.setAlignmentY(Component.TOP_ALIGNMENT);
         this.setBackground(background);
         this.setForeground(foreground);
         this.setBorder(BorderFactory.createLineBorder(background, 5));
@@ -37,15 +36,14 @@ public class ObjectListMenu<E> extends ListMenu<E> {
         JTextArea textArea = new JTextArea();
         textArea.setBackground(background);
         textArea.setForeground(foreground);
-        textArea.setText(listener.getOutputComponent().getText());
-        textArea.setFont(new Font("consolas", Font.PLAIN, 17));
+        textArea.setText(Terminal.getOutputComponent(listener).getText());
+        textArea.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
 
         JPanel labelPanel = new JPanel();
         labelPanel.setBackground(background);
         labelPanel.setForeground(foreground);
-
 
         makeLabels();
         labelPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -57,15 +55,30 @@ public class ObjectListMenu<E> extends ListMenu<E> {
     }
 
     private void initVerticalMenu(){
+        JTextArea textArea = new JTextArea();
+        textArea.setBackground(background);
+        textArea.setForeground(foreground);
+        textArea.setText(Terminal.getOutputComponent(listener).getText());
+        textArea.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
+        textArea.setEditable(false);
+        textArea.setFocusable(false);
+
+        JPanel menuPanel = new JPanel();
+        menuPanel.setBackground(background);
+        menuPanel.setForeground(foreground);
+        menuPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         JPanel labelPanel = new JPanel();
         labelPanel.setBackground(background);
         labelPanel.setForeground(foreground);
-        makeLabels();
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
+        menuPanel.add(labelPanel);
+
+        makeLabels();
         for(JLabel l:labels){
             labelPanel.add(l);
         }
-        this.add(labelPanel, Component.LEFT_ALIGNMENT);
+        this.add(textArea);
+        this.add(menuPanel);
     }
 
     private void makeLabels(){

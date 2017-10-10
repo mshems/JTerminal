@@ -8,7 +8,7 @@ public class CommandExecutor {
             command.executeCommand();
         } else {
             terminal.newLine();
-            terminal.println("Command '"+token+"' not found");
+            terminal.out.println("Command '"+token+"' not found");
         }
         terminal.getCommandTokens().clear();
     }

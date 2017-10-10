@@ -21,9 +21,7 @@ public class StringListMenu extends ListMenu {
         this.strings = strings;
         this.setBackground(background);
         this.setForeground(foreground);
-
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.setAlignmentY(Component.TOP_ALIGNMENT);
         this.setBorder(BorderFactory.createLineBorder(background, 5));
 
         if(direction==VERTICAL){
@@ -31,7 +29,6 @@ public class StringListMenu extends ListMenu {
         } else {
             initHorizontalMenu();
         }
-
         selectItem(0);
     }
 
@@ -39,8 +36,8 @@ public class StringListMenu extends ListMenu {
         JTextArea textArea = new JTextArea();
         textArea.setBackground(background);
         textArea.setForeground(foreground);
-        textArea.setText(listener.getOutputComponent().getText());
-        textArea.setFont(new Font("consolas", Font.PLAIN, 17));
+        textArea.setText(Terminal.getOutputComponent(listener).getText());
+        textArea.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
 
@@ -51,8 +48,8 @@ public class StringListMenu extends ListMenu {
 
         makeLabels();
         labelPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        for(int i=0; i<labels.length; i++){
-            labelPanel.add(labels[i]);
+        for (JLabel l:labels) {
+            labelPanel.add(l);
         }
         this.add(textArea);
         this.add(labelPanel);
@@ -62,23 +59,26 @@ public class StringListMenu extends ListMenu {
         JTextArea textArea = new JTextArea();
         textArea.setBackground(background);
         textArea.setForeground(foreground);
-        textArea.setText(listener.getOutputComponent().getText());
-        textArea.setFont(new Font("consolas", Font.PLAIN, 17));
+        textArea.setText(Terminal.getOutputComponent(listener).getText());
+        textArea.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
-
+        JPanel menuPanel = new JPanel();
+        menuPanel.setBackground(background);
+        menuPanel.setForeground(foreground);
+        menuPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         JPanel labelPanel = new JPanel();
         labelPanel.setBackground(background);
         labelPanel.setForeground(foreground);
-        labelPanel.setBorder(BorderFactory.createLineBorder(foreground,1));
+        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
+        menuPanel.add(labelPanel);
 
         makeLabels();
-        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
         for(JLabel l:labels){
             labelPanel.add(l);
         }
         this.add(textArea);
-        this.add(labelPanel, Component.LEFT_ALIGNMENT);
+        this.add(menuPanel);
     }
 
     private void makeLabels(){
@@ -87,19 +87,17 @@ public class StringListMenu extends ListMenu {
             label.setForeground(foreground);
             label.setBackground(background);
             label.setOpaque(true);
-            label.setFont(new Font("consolas", Font.PLAIN, 17));
+            label.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
             labels[i] = label;
         }
     }
-    public void selectItem(){
-        labels[selection].setForeground(background);
-        labels[selection].setBackground(highlight);
-    }
+    @Override
     public void selectItem(int n){
         selection = n;
         labels[selection].setForeground(background);
         labels[selection].setBackground(highlight);
     }
+    @Override
     public void deselectItem(){
         labels[selection].setForeground(foreground);
         labels[selection].setBackground(background);
@@ -110,12 +108,14 @@ public class StringListMenu extends ListMenu {
         return strings.length;
     }
 
+    @Override
     public void fireEvent (MenuEvent e){
         if(listener!=null){
             listener.menuActionPerformed(e);
         }
     }
 
+    @Override
     public String getSelectedItem(){
         return this.strings[selection];
     }

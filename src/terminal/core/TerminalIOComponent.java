@@ -15,7 +15,7 @@ import java.util.LinkedList;
 public class TerminalIOComponent extends JTextArea{
     private TerminalEventListener listener;
     private boolean allowBackSpace;
-    private boolean multiline;
+    private final boolean multiline;
     private boolean querying;
     private int lastPromptPos;
     private String prompt;
@@ -174,17 +174,16 @@ public class TerminalIOComponent extends JTextArea{
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)), "");
     }
 
-    private void remapArrows(){
+    void unmapArrows(){
+        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0)), "");
+        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)), "");
+        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "");
+        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0)), "");
+    }
+
+    void remapArrows(){
         //LEFT ARROW
-        this.getActionMap().put("leftArrowAction", new AbstractAction(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                if(getCaretPosition() > lastPromptPos){
-                    setCaretPosition(getCaretPosition()-1);
-                }
-            }
-        });
-        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "leftArrowAction");
+        remapLeftArrow();
 
         //RIGHT ARROW
         this.getActionMap().put("rightArrowAction", new AbstractAction(){
@@ -223,6 +222,36 @@ public class TerminalIOComponent extends JTextArea{
             }
         });
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)), "downArrowAction");
+    }
+
+    void remapLeftArrow(){
+        this.getActionMap().put("leftArrowAction", new AbstractAction(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                if(getCaretPosition() > lastPromptPos){
+                    setCaretPosition(getCaretPosition()-1);
+                }
+            }
+        });
+        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "leftArrowAction");
+    }
+
+    static void lockLeftArrow(TerminalIOComponent io, int position){
+        io.getActionMap().put("locked-left-arrow", new AbstractAction(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                if(io.getCaretPosition() > position){
+                    io.setCaretPosition(io.getCaretPosition()-1);
+                }
+            }
+        });
+        io.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "locked-left-arrow");
+    }
+
+    static void unlockLeftArrow(TerminalIOComponent io){
+        io.getInputMap().remove(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0));
+        io.getActionMap().remove("locked-left-arrow");
+        io.remapLeftArrow();
     }
 
     int getFontSize() {
