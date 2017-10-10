@@ -3,7 +3,7 @@
  *
  */
 
-package terminal;
+package terminal.core;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;

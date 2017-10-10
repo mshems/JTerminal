@@ -1,4 +1,4 @@
-package terminal;
+package terminal.core;
 
 import java.io.*;
 import java.nio.file.Files;

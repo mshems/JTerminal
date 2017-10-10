@@ -1,4 +1,6 @@
-package terminal;
+package terminal.core;
+
+import terminal.menus.MenuEvent;
 
 public interface TerminalEventListener {
     void submitActionPerformed(SubmitEvent e);

@@ -1,4 +1,4 @@
-package terminal;
+package terminal.core;
 
 public class CommandExecutor {
     public void doCommand(Terminal terminal, String token){

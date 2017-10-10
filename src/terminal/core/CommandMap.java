@@ -1,4 +1,4 @@
-package terminal;
+package terminal.core;
 
 import java.util.LinkedHashMap;
 

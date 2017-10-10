@@ -1,4 +1,4 @@
-package terminal;
+package terminal.menus;
 
 import java.awt.event.ActionEvent;
 

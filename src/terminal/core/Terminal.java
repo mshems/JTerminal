@@ -1,4 +1,6 @@
-package terminal;
+package terminal.core;
+
+import terminal.menus.MenuEvent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,6 +16,7 @@ public class Terminal implements TerminalEventListener {
     private LinkedList<String> commandTokens;
     private CommandMap commandMap;
     private CommandExecutor commandExecutor;
+    private CommandTokenizer commandTokenizer;
     private Properties properties;
 
     public static final int LEFT_ALIGNED = 0;
@@ -26,6 +29,7 @@ public class Terminal implements TerminalEventListener {
         commandTokens = new LinkedList<>();
         commandMap = new CommandMap();
         commandExecutor = new CommandExecutor();
+        commandTokenizer = new CommandTokenizer();
         properties = new Properties();
         addDefaultCommands();
         initGUI(title);
@@ -54,7 +58,7 @@ public class Terminal implements TerminalEventListener {
             try {
                 wait();
                 if (!commandQueue.isEmpty()) {
-                    tokenize(commandQueue.take());
+                    commandTokenizer.tokenize(this, commandQueue.take());
                     commandExecutor.doCommand(this, commandTokens.peek());
                 }
                 inputComponent.advance();
@@ -68,13 +72,7 @@ public class Terminal implements TerminalEventListener {
     public void close(){
         PropertyHandler.writeProperties(this);
         frame.setVisible(false);
-    }
-
-    private void tokenize(String command) {
-        String[] input = command
-                .trim()
-                .split("\\s+");
-        Collections.addAll(commandTokens, input);
+        frame.dispose();
     }
 
     private synchronized String query(String queryPrompt) {
@@ -206,8 +204,8 @@ public class Terminal implements TerminalEventListener {
     public synchronized void submitActionPerformed(SubmitEvent e) {
         this.notifyAll();
         try {
-            commandQueue.put(e.inputString);
-            inputComponent.updateHistory(e.inputString);
+            commandQueue.put(e.getActionCommand());
+            inputComponent.updateHistory(e.getActionCommand());
         } catch (InterruptedException ex) {
             //ex.printStackTrace();
         }

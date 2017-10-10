@@ -1,4 +1,4 @@
-package terminal;
+package terminal.core;
 
 
 public interface TerminalCommand {
