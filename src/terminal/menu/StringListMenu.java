@@ -1,19 +1,21 @@
-package terminal.menus;
+package terminal.menu;
 
+import terminal.core.QueryEvent;
 import terminal.core.Terminal;
+import terminal.core.TerminalIOComponent;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class StringListMenu extends ListMenu {
+public class StringListMenu extends ListMenu<String> {
     private Terminal listener;
     private String[] strings;
     private JLabel[] labels;
     private int selection;
 
-    private Color background = new Color(33,33,33);
-    private Color foreground = new Color(245,245,245);
-    private Color highlight = new Color(220, 220, 220);
+    private Color background = TerminalIOComponent.DEFAULT_THEME[0];
+    private Color foreground = TerminalIOComponent.DEFAULT_THEME[1];
+    private Color highlight = TerminalIOComponent.DEFAULT_THEME[3];
 
     public StringListMenu(Terminal listener, String[] strings, int direction){
         this.listener = listener;
@@ -36,7 +38,7 @@ public class StringListMenu extends ListMenu {
         JTextArea textArea = new JTextArea();
         textArea.setBackground(background);
         textArea.setForeground(foreground);
-        textArea.setText(Terminal.getOutputComponent(listener).getText());
+        textArea.setText(listener.getOutputComponent().getText());
         textArea.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
@@ -59,7 +61,7 @@ public class StringListMenu extends ListMenu {
         JTextArea textArea = new JTextArea();
         textArea.setBackground(background);
         textArea.setForeground(foreground);
-        textArea.setText(Terminal.getOutputComponent(listener).getText());
+        textArea.setText(listener.getOutputComponent().getText());
         textArea.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
@@ -109,9 +111,9 @@ public class StringListMenu extends ListMenu {
     }
 
     @Override
-    public void fireEvent (MenuEvent e){
+    public void fireEvent (QueryEvent e){
         if(listener!=null){
-            listener.menuActionPerformed(e);
+            listener.queryActionPerformed(e);
         }
     }
 

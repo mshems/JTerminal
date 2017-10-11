@@ -1,4 +1,6 @@
-package terminal.menus;
+package terminal.menu;
+
+import terminal.core.QueryEvent;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -44,7 +46,7 @@ public class MenuKeyListener implements KeyListener {
         }
         if(e.getKeyCode() == KeyEvent.VK_ENTER){
             //menu.setBackground(Color.RED);
-            menu.fireEvent(new MenuEvent(this, 1, "query-event"));
+            menu.fireEvent(new QueryEvent(this, 1, "query-event"));
         }
     }
 

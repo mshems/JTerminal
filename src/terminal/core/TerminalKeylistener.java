@@ -6,7 +6,7 @@ import java.awt.event.KeyListener;
 public class TerminalKeylistener implements KeyListener {
     private final TerminalIOComponent inputComponent;
 
-    TerminalKeylistener(TerminalIOComponent inputComponent){
+    public TerminalKeylistener(TerminalIOComponent inputComponent){
         this.inputComponent = inputComponent;
     }
 

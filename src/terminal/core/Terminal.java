@@ -1,34 +1,26 @@
 package terminal.core;
 
-import terminal.menus.*;
+import terminal.properties.PropertiesManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @SuppressWarnings("unused")
 public class Terminal implements TerminalEventListener {
+    private JFrame frame;
     private Dimension windowSize = new Dimension(800, 600);
     private TerminalIOComponent inputComponent;
     private TerminalIOComponent outputComponent;
-    private JFrame frame;
     private JScrollPane scrollPane;
+
     private LinkedBlockingQueue<String> commandQueue;
     private LinkedList<String> commandTokens;
     private CommandMap commandMap;
     private CommandExecutor commandExecutor;
     private CommandTokenizer commandTokenizer;
-    private Properties properties;
-
     public final TerminalPrinter out;
-
-    public static final int LEFT_ALIGNED = 0;
-    public static final int CENTERED = 1;
-    public static final int RIGHT_ALIGNED = 2;
-
 
     public Terminal(String title) {
         out = new TerminalPrinter(this);
@@ -37,15 +29,13 @@ public class Terminal implements TerminalEventListener {
         commandMap = new CommandMap();
         commandExecutor = new CommandExecutor();
         commandTokenizer = new CommandTokenizer();
-        properties = new Properties();
         addDefaultCommands();
         initUI(title);
-        PropertyHandler.initProperties(this);
     }
 
     private void initUI(String title) {
         frame = new JFrame(title);
-        frame.setMinimumSize(windowSize);
+        frame.setPreferredSize(windowSize);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
@@ -66,19 +56,54 @@ public class Terminal implements TerminalEventListener {
                 wait();
                 if (!commandQueue.isEmpty()) {
                     commandTokenizer.tokenize(this, commandQueue.take());
-                    commandExecutor.doCommand(this, commandTokens.peek());
+                    try {
+                        commandExecutor.doCommand(this, commandTokens.pop());
+                    } catch (UnknownCommandException e){
+                        newLine();
+                        out.println("Unknown command: \""+e.getCommand()+"\"");
+                    }
                 }
                 inputComponent.advance();
             } catch (InterruptedException e) {
-                //e.printStackTrace();
+                e.printStackTrace();
                 break;
             }
         }
     }
 
     public void close(){
-        PropertyHandler.writeProperties(this);
+        PropertiesManager.writeProperties(this);
         frame.dispose();
+    }
+
+    public String nextToken(){
+        if(!commandTokens.isEmpty()){
+            return commandTokens.pop();
+        } else {
+            return null;
+        }
+    }
+
+    public Integer nextIntToken() throws IllegalTokenException{
+        String token = nextToken();
+        try{
+            return Integer.parseInt(token);
+        } catch (NumberFormatException e){
+            throw new IllegalTokenException(token);
+        }
+    }
+
+    public Double nextDoubleToken() throws  IllegalTokenException{
+        String token = nextToken();
+        try{
+            return Double.parseDouble(token);
+        } catch (NumberFormatException e){
+            throw new IllegalTokenException(token);
+        }
+    }
+
+    public Boolean nextBooleanToken(){
+        return Boolean.parseBoolean(nextToken());
     }
 
     public synchronized String next(){
@@ -92,7 +117,7 @@ public class Terminal implements TerminalEventListener {
                 this.wait();
                 input = inputComponent.getText().substring(position, inputComponent.getText().length());
             } catch (InterruptedException ex) {
-                //ex.printStackTrace();
+                ex.printStackTrace();
             }
         }
         TerminalIOComponent.unlockLeftArrow(inputComponent);
@@ -100,19 +125,12 @@ public class Terminal implements TerminalEventListener {
         return input.trim();
     }
 
-    public Integer nextInt(){
-        try{
-            return Integer.parseInt(this.next());
-        } catch (NumberFormatException e){
-            return null;
-        }
+    public Integer nextInt() throws NumberFormatException{
+        return Integer.parseInt(this.next());
     }
-    public Double nextDouble(){
-        try{
-            return Double.parseDouble(this.next());
-        } catch (NumberFormatException e){
-            return null;
-        }
+
+    public Double nextDouble() throws NumberFormatException{
+        return Double.parseDouble(this.next());
     }
 
     public Boolean nextBoolean(){
@@ -129,7 +147,7 @@ public class Terminal implements TerminalEventListener {
                 this.wait();
                 input = inputComponent.getInput();
             } catch (InterruptedException ex) {
-                //ex.printStackTrace();
+                ex.printStackTrace();
             }
         }
         inputComponent.resetPrompt();
@@ -187,7 +205,11 @@ public class Terminal implements TerminalEventListener {
         return null;
     }
 
-    public Boolean queryBoolean(String queryPrompt, boolean allowNull) {
+    public Boolean queryBoolean(String queryPrompt){
+        return Boolean.parseBoolean(query(queryPrompt));
+    }
+
+    public Boolean queryBoolean(String queryPrompt, boolean matchTFOnly, boolean allowNull) {
         while (true) {
             switch (query(queryPrompt).toLowerCase()) {
                 case "t":
@@ -197,88 +219,37 @@ public class Terminal implements TerminalEventListener {
                 case "false":
                     return false;
                 default:
-                    if (allowNull) {
+                    if (allowNull && !matchTFOnly){
                         return null;
+                    } else if(matchTFOnly){
+                        out.println("Not a boolean value");
+                    } else {
+                        return false;
                     }
-                    out.println("Not a boolean value");
             }
         }
     }
 
-    private synchronized <E> E queryMenu(ListMenu<E> menu){
-        E obj = null;
-        MenuKeyListener menuKeyListener = new MenuKeyListener(menu);
-        inputComponent.removeKeyListener(inputComponent.getKeyListeners()[0]);
-        inputComponent.addKeyListener(menuKeyListener);
-        inputComponent.unmapArrows();
-        scrollPane.setViewportView(menu);
-        scrollPane.getViewport().setViewPosition(new Point(0,inputComponent.getHeight()));
-        menu.addKeyListener(menuKeyListener);
-        menu.requestFocusInWindow();
-        synchronized (this) {
-            try{
-                this.wait();
-                obj = menu.getSelectedItem();
-            }catch (InterruptedException ex){
-                //ex.printStackTrace();
-            }
-        }
-        frame.remove(menu);
-        inputComponent.removeKeyListener(menuKeyListener);
-        //inputComponent.addTerminalKeyListener();
-        inputComponent.addKeyListener(new TerminalKeylistener(inputComponent));
-        inputComponent.remapArrows();
-        scrollPane.setViewportView(outputComponent);
-        outputComponent.requestFocusInWindow();
-        return obj;
-    }
-
-    public synchronized <E> E queryObjectListMenu(Map<String, E> map, int direction){
-        ObjectListMenu<E> menu = new ObjectListMenu<E>(this, map, direction);
-        return queryMenu(menu);
-    }
-    public synchronized String queryStringListMenu(String[] strings, int direction){
-        StringListMenu menu = new StringListMenu(this, strings , direction);
-        return (String) queryMenu(menu);
-    }
     void newLine() {
         inputComponent.newLine();
     }
 
-    void clear(){
+    public void clear(){
         outputComponent.clear();
+    }
+
+    public void clearTokens(){
+        this.commandTokens.clear();
     }
 
     public void addDefaultCommands() {
         commandMap.put("", () ->{});
         commandMap.put("clear", this::clear);
-        commandMap.put("terminal-config", this::config);
     }
 
     public void removeDefaultCommands() {
         commandMap.remove("");
         commandMap.remove("clear");
-        commandMap.remove("terminal-config");
-    }
-
-    private void config() {
-        commandTokens.pop();
-        switch (commandTokens.pop()) {
-            case "font-size":
-                if(!commandTokens.isEmpty()) {
-                    try {
-                        int fontSize = Integer.parseInt(commandTokens.pop());
-                        setFontSize(fontSize);
-                        properties.setProperty("font-size", Integer.toString(fontSize));
-                    } catch (NumberFormatException e){
-                        //e.printStackTrace();
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-        PropertyHandler.writeProperties(this);
     }
 
     public synchronized void submitActionPerformed(SubmitEvent e) {
@@ -287,7 +258,7 @@ public class Terminal implements TerminalEventListener {
             commandQueue.put(e.getActionCommand());
             inputComponent.updateHistory(e.getActionCommand());
         } catch (InterruptedException ex) {
-            //ex.printStackTrace();
+            ex.printStackTrace();
         }
     }
 
@@ -295,21 +266,15 @@ public class Terminal implements TerminalEventListener {
         this.notifyAll();
     }
 
-    public synchronized void menuActionPerformed(MenuEvent e) {
-        this.notifyAll();
-    }
-
-
-
-    public void putCommand(String key, TerminalCommand command) {
+    public void putCommand(String key, Command command) {
         commandMap.put(key, command);
     }
 
-    public void replaceCommand(String key, TerminalCommand command) {
+    public void replaceCommand(String key, Command command) {
         commandMap.replace(key, command);
     }
 
-    public void removeCommand(String key, TerminalCommand command) {
+    public void removeCommand(String key, Command command) {
         commandMap.remove(key, command);
     }
 
@@ -317,7 +282,7 @@ public class Terminal implements TerminalEventListener {
         commandMap.remove(key);
     }
 
-    public TerminalCommand getCommand(String key) {
+    public Command getCommand(String key) {
         return this.commandMap.get(key);
     }
 
@@ -341,12 +306,20 @@ public class Terminal implements TerminalEventListener {
         this.commandTokenizer = commandTokenizer;
     }
 
-    public static TerminalIOComponent getInputComponent(Terminal terminal) {
-        return terminal.inputComponent;
+    public TerminalIOComponent getInputComponent() {
+        return inputComponent;
     }
 
-    public static TerminalIOComponent getOutputComponent(Terminal terminal) {
-        return terminal.outputComponent;
+    public TerminalIOComponent getOutputComponent() {
+        return outputComponent;
+    }
+
+    public JFrame getFrame(){
+        return frame;
+    }
+
+    public JScrollPane getScrollPane(){
+        return scrollPane;
     }
 
     public String getDefaultPrompt(){
@@ -365,12 +338,8 @@ public class Terminal implements TerminalEventListener {
         inputComponent.setPrompt(prompt);
     }
 
-    LinkedList<String> getCommandTokens() {
+    public LinkedList<String> getCommandTokens() {
         return commandTokens;
-    }
-
-    Properties getProperties() {
-        return this.properties;
     }
 
     public int getFontSize() {
@@ -378,7 +347,7 @@ public class Terminal implements TerminalEventListener {
 
     }
 
-    void setFontSize(int fontSize) {
+    public void setFontSize(int fontSize) {
         this.inputComponent.setFontSize(fontSize);
         this.outputComponent.setFontSize(fontSize);
     }

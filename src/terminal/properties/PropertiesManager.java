@@ -1,4 +1,6 @@
-package terminal.core;
+package terminal.properties;
+
+import terminal.core.Terminal;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -6,12 +8,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-public class PropertyHandler {
+public class PropertiesManager{
     private static final String PATH = "terminal-config.properties";
+    private static Properties properties;
 
-    public static void initProperties(Terminal terminal){
+    public static void addPropertyManager(Terminal terminal, PropertiesConfigurator configurator){
+        properties = new Properties();
+        initProperties(terminal);
+        terminal.putCommand("terminal-config", ()->configurator.config(terminal, properties));
+    }
 
-        Properties properties = terminal.getProperties();
+    private static void initProperties(Terminal terminal){
         OutputStream out = null;
         Path configPath = Paths.get("./"+PATH);
         if(!Files.exists(configPath)){
@@ -19,17 +26,16 @@ public class PropertyHandler {
                 out= new FileOutputStream(PATH);
 
                 properties.setProperty("font-size", "16");
-                //properties.setProperty("color-theme", "dark");
 
                 properties.store(out, null);
             } catch (IOException e){
-                //e.printStackTrace();
+                e.printStackTrace();
             } finally {
                 if(out != null){
                     try{
                         out.close();
                     } catch (IOException e){
-                        //e.printStackTrace();
+                        e.printStackTrace();
                     }
                 }
             }
@@ -38,7 +44,6 @@ public class PropertyHandler {
     }
 
     public static void readProperties(Terminal terminal){
-        Properties properties = terminal.getProperties();
         InputStream in = null;
         try{
             in = new FileInputStream(PATH);
@@ -48,43 +53,40 @@ public class PropertyHandler {
                 int fontSize = Integer.parseInt(properties.getProperty("font-size"));
                 terminal.setFontSize(fontSize);
             } catch (NumberFormatException e){
-                //e.printStackTrace();
+                e.printStackTrace();
             }
-            //terminal.setTheme(properties.getProperty("color-theme"));
 
 
 
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         } finally {
             if (in != null){
                 try{
                     in.close();
                 } catch (IOException e) {
-                    //e.printStackTrace();
+                    e.printStackTrace();
                 }
             }
         }
     }
 
     public static void writeProperties(Terminal terminal){
-        Properties properties = terminal.getProperties();
         OutputStream out = null;
         try {
             out = new FileOutputStream(PATH);
 
             properties.setProperty("font-size", Integer.toString(terminal.getFontSize()));
-            //properties.setProperty("color-theme", terminal.getTheme());
 
             properties.store(out, null);
         } catch (IOException e){
-            //e.printStackTrace();
+            e.printStackTrace();
         } finally {
             if(out != null){
                 try {
                     out.close();
                 } catch (IOException e) {
-                    //e.printStackTrace();
+                    e.printStackTrace();
                 }
             }
         }

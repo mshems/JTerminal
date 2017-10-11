@@ -1,69 +1,73 @@
 package terminal.core;
 
-public class TerminalPrinter{
+public class TerminalPrinter {
     private final Terminal terminal;
+
+    public static final int LEFT_ALIGNED = 0;
+    public static final int CENTERED = 1;
+    public static final int RIGHT_ALIGNED = 2;
 
     public TerminalPrinter(Terminal terminal){
         this.terminal = terminal;
     }
 
     public void printf(String format, Object... args) {
-        Terminal.getOutputComponent(terminal).print(String.format(format, args));
+        terminal.getOutputComponent().print(String.format(format, args));
     }
 
     public void print(String str) {
-        Terminal.getOutputComponent(terminal).print(str);
+        terminal.getOutputComponent().print(str);
     }
 
     public void print(Integer n) {
-        Terminal.getOutputComponent(terminal).print(n.toString());
+        terminal.getOutputComponent().print(n.toString());
     }
 
     public void print(Double d) {
-        Terminal.getOutputComponent(terminal).print(d.toString());
+        terminal.getOutputComponent().print(d.toString());
     }
 
     public void print(Boolean b) {
-        Terminal.getOutputComponent(terminal).print(b.toString());
+        terminal.getOutputComponent().print(b.toString());
     }
 
     public void print(Object o) {
-        Terminal.getOutputComponent(terminal).print(o.toString());
+        terminal.getOutputComponent().print(o.toString());
     }
 
     public void println(String str) {
-        Terminal.getOutputComponent(terminal).println(str);
+        terminal.getOutputComponent().println(str);
     }
 
     public void println(Integer n) {
-        Terminal.getOutputComponent(terminal).println(n.toString());
+        terminal.getOutputComponent().println(n.toString());
     }
 
     public void println(Double d) {
-        Terminal.getOutputComponent(terminal).println(d.toString());
+        terminal.getOutputComponent().println(d.toString());
     }
 
     public void println(Boolean b) {
-        Terminal.getOutputComponent(terminal).println(b.toString());
+        terminal.getOutputComponent().println(b.toString());
     }
 
     public void println(Object o) {
-        Terminal.getOutputComponent(terminal).println(o.toString());
+        terminal.getOutputComponent().println(o.toString());
     }
 
     public void println(String str, int PRINT_FORMAT) {
         switch (PRINT_FORMAT) {
-            case Terminal.LEFT_ALIGNED:
-                Terminal.getOutputComponent(terminal).print(str);
+            case LEFT_ALIGNED:
+                terminal.getOutputComponent().print(str);
                 break;
-            case Terminal.CENTERED:
-                Terminal.getOutputComponent(terminal).printCentered(str);
+            case CENTERED:
+                terminal.getOutputComponent().printCentered(str);
                 break;
-            case Terminal.RIGHT_ALIGNED:
-                Terminal.getOutputComponent(terminal).printRightAligned(str);
+            case RIGHT_ALIGNED:
+                terminal.getOutputComponent().printRightAligned(str);
                 break;
             default:
-                Terminal.getOutputComponent(terminal).print(str);
+                terminal.getOutputComponent().print(str);
                 break;
         }
     }

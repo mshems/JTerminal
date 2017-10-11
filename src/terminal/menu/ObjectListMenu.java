@@ -1,10 +1,13 @@
-package terminal.menus;
+package terminal.menu;
 
+import terminal.core.QueryEvent;
 import terminal.core.Terminal;
+import terminal.core.TerminalIOComponent;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class ObjectListMenu<E> extends ListMenu<E> {
     private Terminal listener;
@@ -12,9 +15,9 @@ public class ObjectListMenu<E> extends ListMenu<E> {
     private Map<String,  E> itemMap;
     private int selection;
 
-    private Color background = new Color(33,33,33);
-    private Color foreground = new Color(245,245,245);
-    private Color highlight = new Color(220, 220, 220);
+    private Color background = TerminalIOComponent.DEFAULT_THEME[0];
+    private Color foreground = TerminalIOComponent.DEFAULT_THEME[1];
+    private Color highlight = TerminalIOComponent.DEFAULT_THEME[3];
 
     public ObjectListMenu(Terminal listener, Map<String, E> itemMap, int direction){
         this.listener = listener;
@@ -36,7 +39,7 @@ public class ObjectListMenu<E> extends ListMenu<E> {
         JTextArea textArea = new JTextArea();
         textArea.setBackground(background);
         textArea.setForeground(foreground);
-        textArea.setText(Terminal.getOutputComponent(listener).getText());
+        textArea.setText(listener.getOutputComponent().getText());
         textArea.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
@@ -58,7 +61,7 @@ public class ObjectListMenu<E> extends ListMenu<E> {
         JTextArea textArea = new JTextArea();
         textArea.setBackground(background);
         textArea.setForeground(foreground);
-        textArea.setText(Terminal.getOutputComponent(listener).getText());
+        textArea.setText(listener.getOutputComponent().getText());
         textArea.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
@@ -92,10 +95,6 @@ public class ObjectListMenu<E> extends ListMenu<E> {
         }
     }
 
-    public void selectItem(){
-        labels.get(selection).setForeground(background);
-        labels.get(selection).setBackground(highlight);
-    }
     public void selectItem(int n){
         selection = n;
         labels.get(selection).setForeground(background);
@@ -106,9 +105,9 @@ public class ObjectListMenu<E> extends ListMenu<E> {
         labels.get(selection).setBackground(background);
     }
 
-    public void fireEvent (MenuEvent e){
+    public void fireEvent (QueryEvent e){
         if(listener!=null){
-            listener.menuActionPerformed(e);
+            listener.queryActionPerformed(e);
         }
     }
 

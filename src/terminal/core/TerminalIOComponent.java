@@ -1,8 +1,3 @@
-/**
- * Creator: Matthew Shems
- *
- */
-
 package terminal.core;
 
 import javax.swing.*;
@@ -12,7 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 
-public class TerminalIOComponent extends JTextArea{
+public class TerminalIOComponent extends JTextArea {
     private TerminalEventListener listener;
     private boolean allowBackSpace;
     private final boolean multiline;
@@ -31,6 +26,7 @@ public class TerminalIOComponent extends JTextArea{
     public static final Color[] DEFAULT_THEME = new Color[]{
             new Color(33, 33, 33),
             new Color(245, 245, 245),
+            new Color(245,245,245),
             new Color(220, 220, 220)
     };
 
@@ -174,14 +170,14 @@ public class TerminalIOComponent extends JTextArea{
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)), "");
     }
 
-    void unmapArrows(){
+    public void unmapArrows(){
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0)), "");
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)), "");
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "");
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0)), "");
     }
 
-    void remapArrows(){
+    public void remapArrows(){
         //LEFT ARROW
         remapLeftArrow();
 
@@ -224,7 +220,7 @@ public class TerminalIOComponent extends JTextArea{
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)), "downArrowAction");
     }
 
-    void remapLeftArrow(){
+    private void remapLeftArrow(){
         this.getActionMap().put("leftArrowAction", new AbstractAction(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -236,7 +232,7 @@ public class TerminalIOComponent extends JTextArea{
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "leftArrowAction");
     }
 
-    static void lockLeftArrow(TerminalIOComponent io, int position){
+    public static void lockLeftArrow(TerminalIOComponent io, int position){
         io.getActionMap().put("locked-left-arrow", new AbstractAction(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -248,7 +244,7 @@ public class TerminalIOComponent extends JTextArea{
         io.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "locked-left-arrow");
     }
 
-    static void unlockLeftArrow(TerminalIOComponent io){
+    public static void unlockLeftArrow(TerminalIOComponent io){
         io.getInputMap().remove(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0));
         io.getActionMap().remove("locked-left-arrow");
         io.remapLeftArrow();

@@ -1,15 +1,14 @@
 package terminal.core;
 
 public class CommandExecutor {
-    public void doCommand(Terminal terminal, String token){
-        TerminalCommand command = terminal.getCommandMap().get(token);
+    public void doCommand(Terminal terminal, String token) throws UnknownCommandException{
+        Command command = terminal.getCommand(token);
         if(command != null) {
             terminal.newLine();
             command.executeCommand();
         } else {
-            terminal.newLine();
-            terminal.out.println("Command '"+token+"' not found");
+            throw new UnknownCommandException(token);
         }
-        terminal.getCommandTokens().clear();
+        terminal.clearTokens();
     }
 }
