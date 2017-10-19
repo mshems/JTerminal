@@ -1,6 +1,7 @@
 package terminal.core;
 
 import terminal.properties.PropertiesManager;
+import terminal.util.Strings;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +9,7 @@ import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @SuppressWarnings("unused")
-public class Terminal implements TerminalEventListener {
+public class JTerminal implements TerminalEventListener {
     private JFrame frame;
     private Dimension windowSize = new Dimension(800, 600);
     private TerminalIOComponent inputComponent;
@@ -22,7 +23,7 @@ public class Terminal implements TerminalEventListener {
     private CommandTokenizer commandTokenizer;
     public final TerminalPrinter out;
 
-    public Terminal(String title) {
+    public JTerminal(String title) {
         out = new TerminalPrinter(this);
         commandQueue = new LinkedBlockingQueue<>();
         commandTokens = new LinkedList<>();
@@ -163,17 +164,7 @@ public class Terminal implements TerminalEventListener {
             } else if (!input.isEmpty()) {
                 return input;
             }
-            out.println("Empty input not allowed");
-        }
-    }
-
-    public boolean queryYN(String queryPrompt) {
-        switch (query(queryPrompt).toLowerCase()) {
-            case "y":
-            case "yes":
-                return true;
-            default:
-                return false;
+            out.println(Strings.ERROR_EMPTY);
         }
     }
 
@@ -185,7 +176,7 @@ public class Terminal implements TerminalEventListener {
                 if (allowNull) {
                     break;
                 }
-                out.println("Not an integer value");
+                out.println(Strings.ERROR_INTEGER);
             }
         }
         return null;
@@ -199,7 +190,7 @@ public class Terminal implements TerminalEventListener {
                 if (allowNull) {
                     break;
                 }
-                out.println("Not a double value");
+                out.println(Strings.ERROR_DOUBLE);
             }
         }
         return null;
@@ -212,21 +203,31 @@ public class Terminal implements TerminalEventListener {
     public Boolean queryBoolean(String queryPrompt, boolean matchTFOnly, boolean allowNull) {
         while (true) {
             switch (query(queryPrompt).toLowerCase()) {
-                case "t":
-                case "true":
+                case Strings.MATCH_TRUE:
+                case Strings.MATCH_TRUE_SHORT:
                     return true;
-                case "f":
-                case "false":
+                case Strings.MATCH_FALSE:
+                case Strings.MATCH_FALSE_SHORT:
                     return false;
                 default:
                     if (allowNull && !matchTFOnly){
                         return null;
                     } else if(matchTFOnly){
-                        out.println("Not a boolean value");
+                        out.println(Strings.ERROR_BOOL);
                     } else {
                         return false;
                     }
             }
+        }
+    }
+
+    public boolean queryYN(String queryPrompt) {
+        switch (query(queryPrompt).toLowerCase()) {
+            case Strings.MATCH_YES:
+            case Strings.MATCH_YES_SHORT:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -244,12 +245,12 @@ public class Terminal implements TerminalEventListener {
 
     public void addDefaultCommands() {
         commandMap.put("", () ->{});
-        commandMap.put("clear", this::clear);
+        commandMap.put(Strings.COMMAND_CLEAR, this::clear);
     }
 
     public void removeDefaultCommands() {
         commandMap.remove("");
-        commandMap.remove("clear");
+        commandMap.remove(Strings.COMMAND_CLEAR);
     }
 
     public synchronized void submitActionPerformed(SubmitEvent e) {

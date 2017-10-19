@@ -1,11 +1,11 @@
 package terminal.properties;
 
-import terminal.core.Terminal;
+import terminal.core.JTerminal;
 
 import java.util.Properties;
 
 public class PropertiesConfigurator{
-    public void config(Terminal terminal, Properties properties) {
+    public void config(JTerminal terminal, Properties properties) {
         switch (terminal.getCommandTokens().pop()) {
             case "font-size":
                 if(!terminal.getCommandTokens().isEmpty()) {

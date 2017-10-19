@@ -1,7 +1,7 @@
 package terminal.core;
 
 public class CommandExecutor {
-    public void doCommand(Terminal terminal, String token) throws UnknownCommandException{
+    public void doCommand(JTerminal terminal, String token) throws UnknownCommandException{
         Command command = terminal.getCommand(token);
         if(command != null) {
             terminal.newLine();

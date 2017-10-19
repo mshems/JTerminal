@@ -1,13 +1,13 @@
 package terminal.core;
 
 public class TerminalPrinter {
-    private final Terminal terminal;
+    private final JTerminal terminal;
 
     public static final int LEFT_ALIGNED = 0;
     public static final int CENTERED = 1;
     public static final int RIGHT_ALIGNED = 2;
 
-    public TerminalPrinter(Terminal terminal){
+    public TerminalPrinter(JTerminal terminal){
         this.terminal = terminal;
     }
 

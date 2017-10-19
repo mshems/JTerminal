@@ -3,7 +3,7 @@ package terminal.core;
 import java.util.Collections;
 
 public class CommandTokenizer {
-    public void tokenize(Terminal terminal, String command){
+    public void tokenize(JTerminal terminal, String command){
         String[] tokens = command
                 .trim()
                 .split("\\s+");

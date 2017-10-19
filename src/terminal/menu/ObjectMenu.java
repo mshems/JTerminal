@@ -1,31 +1,45 @@
 package terminal.menu;
 
 import terminal.core.QueryEvent;
-import terminal.core.Terminal;
-import terminal.core.TerminalIOComponent;
+import terminal.core.JTerminal;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-public class StringListMenu extends ListMenu<String> {
-    private Terminal listener;
-    private String[] strings;
-    private JLabel[] labels;
+public class ObjectMenu<E> extends ListMenu<E> {
+    private JTerminal terminal;
+    private LinkedList<JLabel> labels;
+    private Map<String,  E> itemMap;
     private int selection;
 
-    private Color background = TerminalIOComponent.DEFAULT_THEME[0];
-    private Color foreground = TerminalIOComponent.DEFAULT_THEME[1];
-    private Color highlight = TerminalIOComponent.DEFAULT_THEME[3];
+    ObjectMenu(JTerminal term, List<E> objects, int direction, LabelFactory<E> labelFactory){
+        this.terminal = term;
+        this.labels = new LinkedList<>();
+        itemMap = new LinkedHashMap<String, E>();
+        initLayout();
+        for(E o:objects){
+            itemMap.put(labelFactory.toLabel(o), o);
+        }
+        makeLabels();
+        if(direction==VERTICAL){
+            initVerticalMenu();
+        } else {
+            initHorizontalMenu();
+        }
+        selectItem(0);
+    }
 
-    public StringListMenu(Terminal listener, String[] strings, int direction){
-        this.listener = listener;
-        this.labels = new JLabel[strings.length];
-        this.strings = strings;
-        this.setBackground(background);
-        this.setForeground(foreground);
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.setBorder(BorderFactory.createLineBorder(background, 5));
 
+    ObjectMenu(JTerminal term, Map<String, E> itemMap, int direction){
+        this.terminal = term;
+        this.labels = new LinkedList<>();
+        this.itemMap = itemMap;
+        initLayout();
+        makeLabels();
         if(direction==VERTICAL){
             initVerticalMenu();
         } else {
@@ -38,19 +52,17 @@ public class StringListMenu extends ListMenu<String> {
         JTextArea textArea = new JTextArea();
         textArea.setBackground(background);
         textArea.setForeground(foreground);
-        textArea.setText(listener.getOutputComponent().getText());
-        textArea.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
+        textArea.setText(terminal.getOutputComponent().getText());
+        textArea.setFont(new Font("consolas", Font.PLAIN, terminal.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
 
         JPanel labelPanel = new JPanel();
         labelPanel.setBackground(background);
         labelPanel.setForeground(foreground);
-        labelPanel.setBorder(BorderFactory.createLineBorder(foreground,1));
 
-        makeLabels();
         labelPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        for (JLabel l:labels) {
+        for(JLabel l:labels){
             labelPanel.add(l);
         }
         this.add(textArea);
@@ -61,10 +73,11 @@ public class StringListMenu extends ListMenu<String> {
         JTextArea textArea = new JTextArea();
         textArea.setBackground(background);
         textArea.setForeground(foreground);
-        textArea.setText(listener.getOutputComponent().getText());
-        textArea.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
+        textArea.setText(terminal.getOutputComponent().getText());
+        textArea.setFont(new Font("consolas", Font.PLAIN, terminal.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
+
         JPanel menuPanel = new JPanel();
         menuPanel.setBackground(background);
         menuPanel.setForeground(foreground);
@@ -75,7 +88,6 @@ public class StringListMenu extends ListMenu<String> {
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
         menuPanel.add(labelPanel);
 
-        makeLabels();
         for(JLabel l:labels){
             labelPanel.add(l);
         }
@@ -84,46 +96,41 @@ public class StringListMenu extends ListMenu<String> {
     }
 
     private void makeLabels(){
-        for(int i=0; i<strings.length; i++){
-            JLabel label = new JLabel(strings[i]);
+        for(String str:itemMap.keySet()){
+            JLabel label = new JLabel(str);
             label.setForeground(foreground);
             label.setBackground(background);
             label.setOpaque(true);
-            label.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
-            labels[i] = label;
+            label.setFont(new Font("consolas", Font.PLAIN, 17));
+            labels.add(label);
         }
     }
-    @Override
+
     public void selectItem(int n){
         selection = n;
-        labels[selection].setForeground(background);
-        labels[selection].setBackground(highlight);
+        labels.get(selection).setForeground(background);
+        labels.get(selection).setBackground(highlight);
     }
-    @Override
     public void deselectItem(){
-        labels[selection].setForeground(foreground);
-        labels[selection].setBackground(background);
+        labels.get(selection).setForeground(foreground);
+        labels.get(selection).setBackground(background);
     }
 
-    @Override
-    public int getNumLabels() {
-        return strings.length;
-    }
-
-    @Override
     public void fireEvent (QueryEvent e){
-        if(listener!=null){
-            listener.queryActionPerformed(e);
+        if(terminal !=null){
+            terminal.queryActionPerformed(e);
         }
     }
 
-    @Override
-    public String getSelectedItem(){
-        return this.strings[selection];
+    public int getNumLabels(){
+        return labels.size();
     }
 
-    @Override
     public int getSelection() {
         return selection;
+    }
+
+    public E getSelectedItem(){
+        return this.itemMap.get(labels.get(selection).getText());
     }
 }

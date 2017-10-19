@@ -1,32 +1,23 @@
 package terminal.menu;
 
 import terminal.core.QueryEvent;
-import terminal.core.Terminal;
-import terminal.core.TerminalIOComponent;
+import terminal.core.JTerminal;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.LinkedList;
-import java.util.Map;
 
-public class ObjectListMenu<E> extends ListMenu<E> {
-    private Terminal listener;
-    private LinkedList<JLabel> labels;
-    private Map<String,  E> itemMap;
+public class BasicMenu extends ListMenu<String> {
+    private JTerminal terminal;
+    private String[] strings;
+    private JLabel[] labels;
     private int selection;
 
-    private Color background = TerminalIOComponent.DEFAULT_THEME[0];
-    private Color foreground = TerminalIOComponent.DEFAULT_THEME[1];
-    private Color highlight = TerminalIOComponent.DEFAULT_THEME[3];
 
-    public ObjectListMenu(Terminal listener, Map<String, E> itemMap, int direction){
-        this.listener = listener;
-        this.labels = new LinkedList<>();
-        this.itemMap = itemMap;
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.setBackground(background);
-        this.setForeground(foreground);
-        this.setBorder(BorderFactory.createLineBorder(background, 5));
+    BasicMenu(JTerminal term, String[] strings, int direction){
+        this.terminal = term;
+        this.labels = new JLabel[strings.length];
+        this.strings = strings;
+        initLayout();
         if(direction==VERTICAL){
             initVerticalMenu();
         } else {
@@ -39,18 +30,19 @@ public class ObjectListMenu<E> extends ListMenu<E> {
         JTextArea textArea = new JTextArea();
         textArea.setBackground(background);
         textArea.setForeground(foreground);
-        textArea.setText(listener.getOutputComponent().getText());
-        textArea.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
+        textArea.setText(terminal.getOutputComponent().getText());
+        textArea.setFont(new Font("consolas", Font.PLAIN, terminal.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
 
         JPanel labelPanel = new JPanel();
         labelPanel.setBackground(background);
         labelPanel.setForeground(foreground);
+        labelPanel.setBorder(BorderFactory.createLineBorder(foreground,1));
 
         makeLabels();
         labelPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        for(JLabel l:labels){
+        for (JLabel l:labels) {
             labelPanel.add(l);
         }
         this.add(textArea);
@@ -61,11 +53,10 @@ public class ObjectListMenu<E> extends ListMenu<E> {
         JTextArea textArea = new JTextArea();
         textArea.setBackground(background);
         textArea.setForeground(foreground);
-        textArea.setText(listener.getOutputComponent().getText());
-        textArea.setFont(new Font("consolas", Font.PLAIN, listener.getFontSize()));
+        textArea.setText(terminal.getOutputComponent().getText());
+        textArea.setFont(new Font("consolas", Font.PLAIN, terminal.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
-
         JPanel menuPanel = new JPanel();
         menuPanel.setBackground(background);
         menuPanel.setForeground(foreground);
@@ -85,41 +76,46 @@ public class ObjectListMenu<E> extends ListMenu<E> {
     }
 
     private void makeLabels(){
-        for(String str:itemMap.keySet()){
-            JLabel label = new JLabel(str);
+        for(int i=0; i<strings.length; i++){
+            JLabel label = new JLabel(strings[i]);
             label.setForeground(foreground);
             label.setBackground(background);
             label.setOpaque(true);
-            label.setFont(new Font("consolas", Font.PLAIN, 17));
-            labels.add(label);
+            label.setFont(new Font("consolas", Font.PLAIN, terminal.getFontSize()));
+            labels[i] = label;
         }
     }
-
+    @Override
     public void selectItem(int n){
         selection = n;
-        labels.get(selection).setForeground(background);
-        labels.get(selection).setBackground(highlight);
+        labels[selection].setForeground(background);
+        labels[selection].setBackground(highlight);
     }
+    @Override
     public void deselectItem(){
-        labels.get(selection).setForeground(foreground);
-        labels.get(selection).setBackground(background);
+        labels[selection].setForeground(foreground);
+        labels[selection].setBackground(background);
     }
 
+    @Override
+    public int getNumLabels() {
+        return strings.length;
+    }
+
+    @Override
     public void fireEvent (QueryEvent e){
-        if(listener!=null){
-            listener.queryActionPerformed(e);
+        if(terminal !=null){
+            terminal.queryActionPerformed(e);
         }
     }
 
-    public int getNumLabels(){
-        return labels.size();
+    @Override
+    public String getSelectedItem(){
+        return this.strings[selection];
     }
 
+    @Override
     public int getSelection() {
         return selection;
-    }
-
-    public E getSelectedItem(){
-        return this.itemMap.get(labels.get(selection).getText());
     }
 }
