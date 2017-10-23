@@ -17,7 +17,7 @@ public class BasicMenu extends ListMenu<String> {
         this.terminal = term;
         this.labels = new JLabel[strings.length];
         this.strings = strings;
-        initLayout();
+        initLayout(terminal.getTheme());
         if(direction==VERTICAL){
             initVerticalMenu();
         } else {
@@ -28,17 +28,18 @@ public class BasicMenu extends ListMenu<String> {
 
     private void initHorizontalMenu(){
         JTextArea textArea = new JTextArea();
-        textArea.setBackground(background);
-        textArea.setForeground(foreground);
+        textArea.setBackground(terminal.getTheme().backgroundColor);
+        textArea.setForeground(terminal.getTheme().foregroundColor);
         textArea.setText(terminal.getOutputComponent().getText());
-        textArea.setFont(new Font("consolas", Font.PLAIN, terminal.getFontSize()));
+        Font f = terminal.getTheme().font;
+        textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
 
         JPanel labelPanel = new JPanel();
-        labelPanel.setBackground(background);
-        labelPanel.setForeground(foreground);
-        labelPanel.setBorder(BorderFactory.createLineBorder(foreground,1));
+        labelPanel.setBackground(terminal.getTheme().backgroundColor);
+        labelPanel.setForeground(terminal.getTheme().foregroundColor);
+        labelPanel.setBorder(BorderFactory.createLineBorder(terminal.getTheme().foregroundColor,1));
 
         makeLabels();
         labelPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -51,19 +52,20 @@ public class BasicMenu extends ListMenu<String> {
 
     private void initVerticalMenu(){
         JTextArea textArea = new JTextArea();
-        textArea.setBackground(background);
-        textArea.setForeground(foreground);
+        textArea.setBackground(terminal.getTheme().backgroundColor);
+        textArea.setForeground(terminal.getTheme().foregroundColor);
         textArea.setText(terminal.getOutputComponent().getText());
-        textArea.setFont(new Font("consolas", Font.PLAIN, terminal.getFontSize()));
+        Font f = terminal.getTheme().font;
+        textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
         JPanel menuPanel = new JPanel();
-        menuPanel.setBackground(background);
-        menuPanel.setForeground(foreground);
+        menuPanel.setBackground(terminal.getTheme().backgroundColor);
+        menuPanel.setForeground(terminal.getTheme().foregroundColor);
         menuPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         JPanel labelPanel = new JPanel();
-        labelPanel.setBackground(background);
-        labelPanel.setForeground(foreground);
+        labelPanel.setBackground(terminal.getTheme().backgroundColor);
+        labelPanel.setForeground(terminal.getTheme().foregroundColor);
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
         menuPanel.add(labelPanel);
 
@@ -78,23 +80,24 @@ public class BasicMenu extends ListMenu<String> {
     private void makeLabels(){
         for(int i=0; i<strings.length; i++){
             JLabel label = new JLabel(strings[i]);
-            label.setForeground(foreground);
-            label.setBackground(background);
+            label.setBackground(terminal.getTheme().backgroundColor);
+            label.setForeground(terminal.getTheme().foregroundColor);
             label.setOpaque(true);
-            label.setFont(new Font("consolas", Font.PLAIN, terminal.getFontSize()));
+            Font f = terminal.getTheme().font;
+            label.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
             labels[i] = label;
         }
     }
     @Override
     public void selectItem(int n){
         selection = n;
-        labels[selection].setForeground(background);
-        labels[selection].setBackground(highlight);
+        labels[selection].setForeground(terminal.getTheme().backgroundColor);
+        labels[selection].setBackground(terminal.getTheme().highlightColor);
     }
     @Override
     public void deselectItem(){
-        labels[selection].setForeground(foreground);
-        labels[selection].setBackground(background);
+        labels[selection].setBackground(terminal.getTheme().backgroundColor);
+        labels[selection].setForeground(terminal.getTheme().foregroundColor);
     }
 
     @Override

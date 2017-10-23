@@ -1,9 +1,6 @@
 package terminal.menu;
 
-import terminal.core.QueryEvent;
-import terminal.core.JTerminal;
-import terminal.core.TerminalIOComponent;
-import terminal.core.TerminalKeylistener;
+import terminal.core.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,15 +16,11 @@ public abstract class ListMenu<E> extends JPanel {
     public abstract int getNumLabels();
     public void fireEvent(QueryEvent e){};
 
-    Color background = TerminalIOComponent.DEFAULT_THEME[0];
-    Color foreground = TerminalIOComponent.DEFAULT_THEME[1];
-    Color highlight = TerminalIOComponent.DEFAULT_THEME[3];
-
-    void initLayout(){
-        this.setBackground(background);
-        this.setForeground(foreground);
+    void initLayout(JTerminalTheme theme){
+        this.setBackground(theme.backgroundColor);
+        this.setForeground(theme.foregroundColor);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.setBorder(BorderFactory.createLineBorder(background, 5));
+        this.setBorder(BorderFactory.createLineBorder(theme.backgroundColor, 8));
     }
 
     public static synchronized <E> E queryMenu(JTerminal terminal, ListMenu<E> menu){

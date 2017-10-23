@@ -20,7 +20,7 @@ public class ObjectMenu<E> extends ListMenu<E> {
         this.terminal = term;
         this.labels = new LinkedList<>();
         itemMap = new LinkedHashMap<String, E>();
-        initLayout();
+        initLayout(terminal.getTheme());
         for(E o:objects){
             itemMap.put(labelFactory.toLabel(o), o);
         }
@@ -38,7 +38,7 @@ public class ObjectMenu<E> extends ListMenu<E> {
         this.terminal = term;
         this.labels = new LinkedList<>();
         this.itemMap = itemMap;
-        initLayout();
+        initLayout(terminal.getTheme());
         makeLabels();
         if(direction==VERTICAL){
             initVerticalMenu();
@@ -50,16 +50,17 @@ public class ObjectMenu<E> extends ListMenu<E> {
 
     private void initHorizontalMenu(){
         JTextArea textArea = new JTextArea();
-        textArea.setBackground(background);
-        textArea.setForeground(foreground);
+        textArea.setBackground(terminal.getTheme().backgroundColor);
+        textArea.setForeground(terminal.getTheme().foregroundColor);
         textArea.setText(terminal.getOutputComponent().getText());
-        textArea.setFont(new Font("consolas", Font.PLAIN, terminal.getFontSize()));
+        Font f = terminal.getTheme().font;
+        textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
 
         JPanel labelPanel = new JPanel();
-        labelPanel.setBackground(background);
-        labelPanel.setForeground(foreground);
+        labelPanel.setBackground(terminal.getTheme().backgroundColor);
+        labelPanel.setForeground(terminal.getTheme().foregroundColor);
 
         labelPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         for(JLabel l:labels){
@@ -71,20 +72,21 @@ public class ObjectMenu<E> extends ListMenu<E> {
 
     private void initVerticalMenu(){
         JTextArea textArea = new JTextArea();
-        textArea.setBackground(background);
-        textArea.setForeground(foreground);
+        textArea.setBackground(terminal.getTheme().backgroundColor);
+        textArea.setForeground(terminal.getTheme().foregroundColor);
         textArea.setText(terminal.getOutputComponent().getText());
-        textArea.setFont(new Font("consolas", Font.PLAIN, terminal.getFontSize()));
+        Font f = terminal.getTheme().font;
+        textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
         textArea.setEditable(false);
         textArea.setFocusable(false);
 
         JPanel menuPanel = new JPanel();
-        menuPanel.setBackground(background);
-        menuPanel.setForeground(foreground);
+        menuPanel.setBackground(terminal.getTheme().backgroundColor);
+        menuPanel.setForeground(terminal.getTheme().foregroundColor);
         menuPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         JPanel labelPanel = new JPanel();
-        labelPanel.setBackground(background);
-        labelPanel.setForeground(foreground);
+        labelPanel.setBackground(terminal.getTheme().backgroundColor);
+        labelPanel.setForeground(terminal.getTheme().foregroundColor);
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
         menuPanel.add(labelPanel);
 
@@ -98,22 +100,23 @@ public class ObjectMenu<E> extends ListMenu<E> {
     private void makeLabels(){
         for(String str:itemMap.keySet()){
             JLabel label = new JLabel(str);
-            label.setForeground(foreground);
-            label.setBackground(background);
+            label.setBackground(terminal.getTheme().backgroundColor);
+            label.setForeground(terminal.getTheme().foregroundColor);
             label.setOpaque(true);
-            label.setFont(new Font("consolas", Font.PLAIN, 17));
+            Font f = terminal.getTheme().font;
+            label.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
             labels.add(label);
         }
     }
 
     public void selectItem(int n){
         selection = n;
-        labels.get(selection).setForeground(background);
-        labels.get(selection).setBackground(highlight);
+        labels.get(selection).setForeground(terminal.getTheme().backgroundColor);
+        labels.get(selection).setBackground(terminal.getTheme().highlightColor);
     }
     public void deselectItem(){
-        labels.get(selection).setForeground(foreground);
-        labels.get(selection).setBackground(background);
+        labels.get(selection).setBackground(terminal.getTheme().backgroundColor);
+        labels.get(selection).setForeground(terminal.getTheme().foregroundColor);
     }
 
     public void fireEvent (QueryEvent e){

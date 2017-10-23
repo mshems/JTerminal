@@ -9,6 +9,7 @@ import java.util.LinkedList;
 
 public class TerminalIOComponent extends JTextArea {
     private TerminalEventListener listener;
+    private JTerminal parent;
     private boolean allowBackSpace;
     private final boolean multiline;
     private boolean querying;
@@ -23,25 +24,19 @@ public class TerminalIOComponent extends JTextArea {
     private static final String USER_NAME = System.getProperty("user.name");
     private static final String DEFAULT_PROMPT = USER_NAME+" ~ ";
 
-    public static final Color[] DEFAULT_THEME = new Color[]{
-            new Color(33, 33, 33),
-            new Color(245, 245, 245),
-            new Color(245,245,245),
-            new Color(220, 220, 220)
-    };
-
-
-    public TerminalIOComponent(boolean multi){
+    public TerminalIOComponent(JTerminal parent, boolean multi){
+        this.parent = parent;
         this.addKeyListener(new TerminalKeylistener(this));
         this.remapEnterKey();
         this.remapArrows();
-        this.setMargin(new Insets(5,5,5,5));
+        this.setMargin(new Insets(8,8,8,8));
 
-        this.setBackground(DEFAULT_THEME[0]);
-        this.setForeground(DEFAULT_THEME[1]);
-        this.setCaretColor(DEFAULT_THEME[2]);
+        this.setBackground(parent.getTheme().backgroundColor);
+        this.setForeground(parent.getTheme().foregroundColor);
+        this.setCaretColor(parent.getTheme().caretColor);
+        Font f = parent.getTheme().font;
+        this.setFont(new Font(f.getName(), f.getStyle(), fontSize));
 
-        this.setFont(new Font("consolas", Font.PLAIN, fontSize));
         history = new LinkedList<>();
         multiline = multi;
         defaultPrompt = DEFAULT_PROMPT;
@@ -256,7 +251,8 @@ public class TerminalIOComponent extends JTextArea {
 
     void setFontSize(int fontSize) {
         this.fontSize = fontSize;
-        this.setFont(new Font("consolas", Font.PLAIN, fontSize));
+        Font f = parent.getTheme().font;
+        this.setFont(new Font(f.getName(), f.getStyle(), fontSize));
     }
 
     String getPrompt() {

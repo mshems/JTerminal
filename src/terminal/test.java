@@ -23,6 +23,11 @@ public class test{
             String s = ListMenu.queryMenu(terminal, m);
             terminal.out.println("You selected: "+s);
         });
+
+        terminal.putCommand("quit", ()->{
+            terminal.close();
+            System.exit(0);
+        });
         terminal.start();
     }
 }

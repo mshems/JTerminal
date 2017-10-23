@@ -15,7 +15,7 @@ public class JTerminal implements TerminalEventListener {
     private TerminalIOComponent inputComponent;
     private TerminalIOComponent outputComponent;
     private JScrollPane scrollPane;
-
+    private JTerminalTheme theme;
     private LinkedBlockingQueue<String> commandQueue;
     private LinkedList<String> commandTokens;
     private CommandMap commandMap;
@@ -30,6 +30,7 @@ public class JTerminal implements TerminalEventListener {
         commandMap = new CommandMap();
         commandExecutor = new CommandExecutor();
         commandTokenizer = new CommandTokenizer();
+        theme = new JTerminalTheme("default-dark");
         addDefaultCommands();
         initUI(title);
     }
@@ -40,7 +41,7 @@ public class JTerminal implements TerminalEventListener {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
-        inputComponent = new TerminalIOComponent(true);
+        inputComponent = new TerminalIOComponent(this,true);
         inputComponent.setTerminalEventListener(this);
         outputComponent = inputComponent;
 
@@ -351,5 +352,13 @@ public class JTerminal implements TerminalEventListener {
     public void setFontSize(int fontSize) {
         this.inputComponent.setFontSize(fontSize);
         this.outputComponent.setFontSize(fontSize);
+    }
+
+    public JTerminalTheme getTheme(){
+        return theme;
+    }
+
+    public void setTheme(JTerminalTheme theme){
+        this.theme = theme;
     }
 }
