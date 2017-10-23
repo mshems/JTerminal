@@ -1,4 +1,4 @@
-# terminal
+# JTerminal
 A standalone, customizable, command-line interface built with Swing.
 ## Usage
 ### Creation & Setup:
