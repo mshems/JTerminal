@@ -1,7 +1,8 @@
-package terminal.menu;
+package terminal.optional.menu;
 
 import terminal.core.JTerminal;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -18,9 +19,9 @@ public class MenuBuilder{
     }
 
     public <E> ObjectMenu<E> buildMenu(JTerminal terminal, Map<String, E> map){
-        return new ObjectMenu<E>(terminal, map, this.direction);
+        return new ObjectMenu<>(terminal, map, this.direction);
     }
-    public <E> ObjectMenu<E> buildMenu(JTerminal terminal, List<E> list, LabelFactory<E> labelFactory){
-        return new ObjectMenu<E>(terminal, list, this.direction, labelFactory);
+    public <E> ObjectMenu<E> buildMenu(JTerminal terminal, Collection<E> list, LabelFactory<E> labelFactory){
+        return new ObjectMenu<>(terminal, list, this.direction, labelFactory);
     }
 }

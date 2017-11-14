@@ -1,5 +1,10 @@
 package terminal.core;
 
+import terminal.core.event.QueryEvent;
+import terminal.core.event.SubmitEvent;
+import terminal.core.theme.Theme;
+import terminal.core.theme.ThemedComponent;
+
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
@@ -7,9 +12,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 
-public class TerminalIOComponent extends JTextArea {
-    private TerminalEventListener listener;
-    private JTerminal parent;
+public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
+    private JTerminalEventListener listener;
+    private Theme theme;
     private boolean allowBackSpace;
     private final boolean multiline;
     private boolean querying;
@@ -18,25 +23,20 @@ public class TerminalIOComponent extends JTextArea {
     private String defaultPrompt;
     private LinkedList<String> history;
     private int historyPointer = 0;
-    private static final int MAX_LINES = 256;
+    private static final int MAX_LINES = 1024;
+    private static final int MAX_HISTORY_SIZE = 64;
     private int fontSize = 17;
 
     private static final String USER_NAME = System.getProperty("user.name");
     private static final String DEFAULT_PROMPT = USER_NAME+" ~ ";
 
-    public TerminalIOComponent(JTerminal parent, boolean multi){
-        this.parent = parent;
-        this.addKeyListener(new TerminalKeylistener(this));
+    public JTerminalIOComponent(Theme terminalTheme, boolean multi){
+        this.addKeyListener(new JTerminalKeylistener(this));
         this.remapEnterKey();
         this.remapArrows();
-        this.setMargin(new Insets(8,8,8,8));
+        this.applyTheme(terminalTheme);
 
-        this.setBackground(parent.getTheme().backgroundColor);
-        this.setForeground(parent.getTheme().foregroundColor);
-        this.setCaretColor(parent.getTheme().caretColor);
-        Font f = parent.getTheme().font;
-        this.setFont(new Font(f.getName(), f.getStyle(), fontSize));
-
+        theme = terminalTheme;
         history = new LinkedList<>();
         multiline = multi;
         defaultPrompt = DEFAULT_PROMPT;
@@ -75,7 +75,7 @@ public class TerminalIOComponent extends JTextArea {
                         this.getLineStartOffset(0),
                         this.getLineEndOffset(linesToRemove));
             } catch (BadLocationException e){
-                //e.printStackTrace();
+                e.printStackTrace();
             }
         }
         this.prompt();
@@ -132,7 +132,7 @@ public class TerminalIOComponent extends JTextArea {
     }
 
     void updateHistory(String command){
-        if(history.size()>=25){
+        if(history.size()>=MAX_HISTORY_SIZE){
             history.removeLast();
         }
         history.addFirst(command);
@@ -174,7 +174,15 @@ public class TerminalIOComponent extends JTextArea {
 
     public void remapArrows(){
         //LEFT ARROW
-        remapLeftArrow();
+        this.getActionMap().put("leftArrowAction", new AbstractAction(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                if(getCaretPosition() > lastPromptPos){
+                    setCaretPosition(getCaretPosition()-1);
+                }
+            }
+        });
+        this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "leftArrowAction");
 
         //RIGHT ARROW
         this.getActionMap().put("rightArrowAction", new AbstractAction(){
@@ -227,7 +235,7 @@ public class TerminalIOComponent extends JTextArea {
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "leftArrowAction");
     }
 
-    public static void lockLeftArrow(TerminalIOComponent io, int position){
+    static void lockLeftArrow(JTerminalIOComponent io, int position){
         io.getActionMap().put("locked-left-arrow", new AbstractAction(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -239,7 +247,7 @@ public class TerminalIOComponent extends JTextArea {
         io.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "locked-left-arrow");
     }
 
-    public static void unlockLeftArrow(TerminalIOComponent io){
+    static void unlockLeftArrow(JTerminalIOComponent io){
         io.getInputMap().remove(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0));
         io.getActionMap().remove("locked-left-arrow");
         io.remapLeftArrow();
@@ -251,7 +259,7 @@ public class TerminalIOComponent extends JTextArea {
 
     void setFontSize(int fontSize) {
         this.fontSize = fontSize;
-        Font f = parent.getTheme().font;
+        Font f = this.theme.font;
         this.setFont(new Font(f.getName(), f.getStyle(), fontSize));
     }
 
@@ -291,7 +299,16 @@ public class TerminalIOComponent extends JTextArea {
         this.querying = querying;
     }
 
-    void setTerminalEventListener(TerminalEventListener listener){
+    void setTerminalEventListener(JTerminalEventListener listener){
         this.listener = listener;
+    }
+
+    @Override
+    public void applyTheme(Theme theme) {
+        this.setBackground(theme.backgroundColor);
+        this.setForeground(theme.foregroundColor);
+        this.setCaretColor(theme.caretColor);
+        Font f = theme.font;
+        this.setFont(new Font(f.getName(), f.getStyle(), fontSize));
     }
 }

@@ -1,4 +1,4 @@
-package terminal.core;
+package terminal.core.event;
 
 import java.awt.event.ActionEvent;
 

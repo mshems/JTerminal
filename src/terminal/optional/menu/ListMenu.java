@@ -1,11 +1,14 @@
-package terminal.menu;
+package terminal.optional.menu;
 
 import terminal.core.*;
+import terminal.core.event.QueryEvent;
+import terminal.core.theme.Theme;
+import terminal.core.theme.ThemedComponent;
 
 import javax.swing.*;
 import java.awt.*;
 
-public abstract class ListMenu<E> extends JPanel {
+public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
 
@@ -14,13 +17,11 @@ public abstract class ListMenu<E> extends JPanel {
     public abstract void selectItem(int index);
     public abstract void deselectItem();
     public abstract int getNumLabels();
-    public void fireEvent(QueryEvent e){};
+    public abstract void fireEvent(QueryEvent e);
 
-    void initLayout(JTerminalTheme theme){
-        this.setBackground(theme.backgroundColor);
-        this.setForeground(theme.foregroundColor);
+    void initLayout(Theme theme){
+        this.applyTheme(theme);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.setBorder(BorderFactory.createLineBorder(theme.backgroundColor, 8));
     }
 
     public static synchronized <E> E queryMenu(JTerminal terminal, ListMenu<E> menu){
@@ -28,7 +29,7 @@ public abstract class ListMenu<E> extends JPanel {
         MenuKeyListener menuKeyListener = new MenuKeyListener(menu);
         terminal.getInputComponent().removeKeyListener(terminal.getInputComponent().getKeyListeners()[0]);
         terminal.getInputComponent().addKeyListener(menuKeyListener);
-        terminal.getInputComponent().unmapArrows();
+        terminal.getInputComponent().setEditable(false);
         terminal.getScrollPane().setViewportView(menu);
         terminal.getScrollPane().getViewport().setViewPosition(new Point(0,terminal.getOutputComponent().getHeight()));
         menu.addKeyListener(menuKeyListener);
@@ -36,26 +37,21 @@ public abstract class ListMenu<E> extends JPanel {
         try {
             terminal.wait();
             obj = menu.getSelectedItem();
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         terminal.getFrame().remove(menu);
         terminal.getInputComponent().removeKeyListener(menuKeyListener);
-        terminal.getInputComponent().addKeyListener(new TerminalKeylistener(terminal.getInputComponent()));
-        terminal.getInputComponent().remapArrows();
+        terminal.getInputComponent().addKeyListener(new JTerminalKeylistener(terminal.getInputComponent()));
+        terminal.getInputComponent().setEditable(true);
         terminal.getScrollPane().setViewportView(terminal.getOutputComponent());
         terminal.getOutputComponent().requestFocusInWindow();
         return obj;
     }
 
-    /*
-    public static synchronized <E> E queryObjectMenu(Terminal terminal, Map<String, E> map, int direction){
-        ObjectMenu<E> menu = new ObjectMenu<E>(terminal, map, direction);
-        return queryMenu(terminal, menu);
+    @Override
+    public void applyTheme(Theme theme){
+        this.setBackground(theme.backgroundColor);
+        this.setForeground(theme.foregroundColor);
     }
-    public static synchronized String queryBasicMenu(Terminal terminal, String[] strings, int direction){
-        BasicMenu menu = new BasicMenu(terminal, strings , direction);
-        return queryMenu(terminal,menu);
-    }
-    */
 }

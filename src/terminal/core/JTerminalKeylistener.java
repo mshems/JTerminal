@@ -1,12 +1,15 @@
 package terminal.core;
 
+import terminal.core.event.QueryEvent;
+import terminal.core.event.SubmitEvent;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class TerminalKeylistener implements KeyListener {
-    private final TerminalIOComponent inputComponent;
+public class JTerminalKeylistener implements KeyListener {
+    private final JTerminalIOComponent inputComponent;
 
-    public TerminalKeylistener(TerminalIOComponent inputComponent){
+    public JTerminalKeylistener(JTerminalIOComponent inputComponent){
         this.inputComponent = inputComponent;
     }
 

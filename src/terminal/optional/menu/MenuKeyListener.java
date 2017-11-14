@@ -1,6 +1,6 @@
-package terminal.menu;
+package terminal.optional.menu;
 
-import terminal.core.QueryEvent;
+import terminal.core.event.QueryEvent;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -8,7 +8,7 @@ import java.awt.event.KeyListener;
 public class MenuKeyListener implements KeyListener {
     private ListMenu menu;
 
-    public MenuKeyListener(ListMenu menu){
+    MenuKeyListener(ListMenu menu){
         super();
         this.menu = menu;
     }
@@ -19,7 +19,6 @@ public class MenuKeyListener implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e){
-
         if(e.getKeyCode() == KeyEvent.VK_UP){
             if(menu.getSelection()>0) {
                 menu.deselectItem();
@@ -45,7 +44,6 @@ public class MenuKeyListener implements KeyListener {
             }
         }
         if(e.getKeyCode() == KeyEvent.VK_ENTER){
-            //menu.setBackground(Color.RED);
             menu.fireEvent(new QueryEvent(this, 1, "query-event"));
         }
     }
