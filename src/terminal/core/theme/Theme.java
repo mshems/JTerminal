@@ -1,9 +1,11 @@
 package terminal.core.theme;
 
 import java.awt.*;
+import java.awt.image.ColorConvertOp;
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class Theme {
+public class Theme implements Serializable{
     private static final Color DEFAULT_BACKGROUND_COLOR_DARK = new Color(36, 36, 36);;
     private static final Color DEFAULT_FOREGROUND_COLOR_DARK = new Color(245, 245, 245);
     private static final Color DEFAULT_CARET_COLOR_DARK = new Color(245,245,245);
@@ -12,8 +14,7 @@ public class Theme {
     private static final Color DEFAULT_FOREGROUND_COLOR_LIGHT = new Color(33, 33, 33);
     private static final Color DEFAULT_CARET_COLOR_LIGHT = new Color(33,33,33);
     private static final Color DEFAULT_HIGHLIGHT_COLOR_LIGHT = new Color(100, 100, 100);
-    private static final Font  DEFAULT_FONT_MONO = new Font(Font.MONOSPACED, Font.PLAIN, 16);
-//    private static final Font  DEFAULT_FONT_CONSOLAS = new Font("consolas", Font.PLAIN, 16);
+    public static final Font  DEFAULT_FONT_MONO = new Font(Font.MONOSPACED, Font.PLAIN, 16);
 
     private String themeName;
     public Color backgroundColor;
@@ -25,26 +26,38 @@ public class Theme {
     public Theme(String themeName){
         this.themeName = themeName;
         this.font = DEFAULT_FONT_MONO;
+        backgroundColor = Color.BLACK;
+        foregroundColor = Color.WHITE;
+        caretColor = Color.WHITE;
+        highlightColor = Color.WHITE;
 
-        switch (themeName) {
-            case "default-dark":
-                backgroundColor = DEFAULT_BACKGROUND_COLOR_DARK;
-                foregroundColor = DEFAULT_FOREGROUND_COLOR_DARK;
-                caretColor = DEFAULT_CARET_COLOR_DARK;
-                highlightColor = DEFAULT_HIGHLIGHT_COLOR_DARK;
-                break;
-            case "default-light":
-                backgroundColor = DEFAULT_BACKGROUND_COLOR_LIGHT;
-                foregroundColor = DEFAULT_FOREGROUND_COLOR_LIGHT;
-                caretColor = DEFAULT_CARET_COLOR_LIGHT;
-                highlightColor = DEFAULT_HIGHLIGHT_COLOR_LIGHT;
-                break;
-            default:
-                if(backgroundColor==null) backgroundColor = Color.BLACK;
-                if(foregroundColor==null) foregroundColor = Color.WHITE;
-                if(caretColor==null) caretColor = Color.WHITE;
-                if(highlightColor==null) highlightColor = Color.LIGHT_GRAY;
-                break;
-        }
+    }
+
+    public static Theme DEFAULT_THEME(){
+        Theme t = new Theme("default");
+        t.backgroundColor = Color.BLACK;
+        t.foregroundColor = Color.WHITE;
+        t.caretColor = Color.WHITE;
+        t.highlightColor = Color.WHITE;
+        return t;
+    }
+
+    public static Theme DEFAULT_DARK_THEME(){
+        Theme t = new Theme("default-dark");
+        t.backgroundColor = DEFAULT_BACKGROUND_COLOR_DARK;
+        t.foregroundColor = DEFAULT_FOREGROUND_COLOR_DARK;
+        t.caretColor = DEFAULT_CARET_COLOR_DARK;
+        t.highlightColor = DEFAULT_HIGHLIGHT_COLOR_DARK;
+        return t;
+    }
+
+    public static Theme DEFAULT_LIGHT_THEME(){
+        Theme t = new Theme("default-light");
+        t.backgroundColor = DEFAULT_BACKGROUND_COLOR_LIGHT;
+        t.foregroundColor = DEFAULT_FOREGROUND_COLOR_LIGHT;
+        t.caretColor = DEFAULT_CARET_COLOR_LIGHT;
+        t.highlightColor = DEFAULT_HIGHLIGHT_COLOR_LIGHT;
+        return t;
     }
 }
+

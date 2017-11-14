@@ -6,13 +6,21 @@ import terminal.core.JTerminal;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Basic Menu constructed using a String array as the entries in the menu.
+ */
 public class BasicMenu extends ListMenu<String> {
     private JTerminal terminal;
     private String[] strings;
     private JLabel[] labels;
     private int selection;
 
-
+    /**
+     * Creates a new instance of a BasicMenu.
+     * @param term JTerminal on which to display the menu
+     * @param strings String array of the menu's entries
+     * @param direction constants ListMenu.VERTICAL or ListMenu.HORIZONTAL specifying the layout of the menu
+     */
     BasicMenu(JTerminal term, String[] strings, int direction){
         this.terminal = term;
         this.labels = new JLabel[strings.length];
@@ -34,10 +42,8 @@ public class BasicMenu extends ListMenu<String> {
         JPanel labelPanel = new JPanel();
         labelPanel.setBackground(terminal.getTheme().backgroundColor);
         labelPanel.setForeground(terminal.getTheme().foregroundColor);
-        labelPanel.setBorder(BorderFactory.createLineBorder(terminal.getTheme().foregroundColor,1));
-
-        makeLabels();
         labelPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        makeLabels();
         for (JLabel l:labels) {
             labelPanel.add(l);
         }
@@ -75,21 +81,26 @@ public class BasicMenu extends ListMenu<String> {
             label.setBackground(terminal.getTheme().backgroundColor);
             label.setForeground(terminal.getTheme().foregroundColor);
             label.setOpaque(true);
+            label.setBorder(BorderFactory.createLineBorder(terminal.getTheme().backgroundColor, 3));
             Font f = terminal.getTheme().font;
             label.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
             labels[i] = label;
         }
     }
+
     @Override
     public void selectItem(int n){
         selection = n;
         labels[selection].setForeground(terminal.getTheme().backgroundColor);
         labels[selection].setBackground(terminal.getTheme().highlightColor);
+        labels[selection].setBorder(BorderFactory.createLineBorder(terminal.getTheme().highlightColor, 3));
     }
     @Override
     public void deselectItem(){
         labels[selection].setBackground(terminal.getTheme().backgroundColor);
         labels[selection].setForeground(terminal.getTheme().foregroundColor);
+        labels[selection].setBorder(BorderFactory.createLineBorder(terminal.getTheme().backgroundColor, 3));
+
     }
 
     @Override

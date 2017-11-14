@@ -1,7 +1,8 @@
 package terminal.optional.properties;
 
+import terminal.core.CommandAction;
+import terminal.core.IllegalTokenException;
 import terminal.core.JTerminal;
-import terminal.util.Strings;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -14,26 +15,53 @@ public class PropertiesManager{
     private static final String FILENAME = "terminal-config.properties";
     private static final String PATH = "./"+FILENAME;
     private static Properties properties;
+    private static PropertiesConfigCommand propertiesConfigCommand = new PropertiesConfigCommand();
 
-    public static void addPropertyManager(JTerminal terminal, PropertiesConfigurator configurator){
+    public static void addPropertiesManager(JTerminal terminal){
         properties = new Properties();
-        initProperties(terminal);
-        terminal.putCommand(COMMAND_CONFIG, ()->configurator.config(terminal, properties));
-    }
-    public static void addPropertyManager(JTerminal terminal){
-        properties = new Properties();
-        initProperties(terminal);
-        terminal.putCommand(COMMAND_CONFIG, ()->new PropertiesConfigurator().config(terminal, properties));
+        terminal.putCommand(COMMAND_CONFIG, ()->propertiesConfigCommand.config(terminal, properties));
+
+        addProperty("font-size", "16", () -> {
+            if (!terminal.hasTokens()) return;
+            try {
+                int fontSize = terminal.nextIntToken();
+                properties.setProperty("font-size", "" + fontSize);
+                terminal.setFontSize(fontSize);
+            } catch (IllegalTokenException e) {
+                terminal.out.println("ERROR: Font size must be an integer");
+            }
+        });
     }
 
-    private static void initProperties(JTerminal terminal){
+
+    public static String getProperty(String propertyName){
+        return properties.getProperty(propertyName);
+    }
+
+    public static void setProperty(String propertyName, String propertyValue){
+        properties.setProperty(propertyName,propertyValue);
+    }
+
+    public static void addProperty(String propertyName, String defaultValue){
+        properties.setProperty(propertyName, defaultValue);
+    }
+
+    public static void addProperty(String propertyName, String defaultValue, CommandAction customBehavior){
+        properties.setProperty(propertyName, defaultValue);
+        propertiesConfigCommand.addCustomBehavior(propertyName, customBehavior);
+    }
+
+    public static void removeProperty(String propertyName){
+        properties.remove(propertyName);
+        propertiesConfigCommand.removeCustomBehavior(propertyName);
+    }
+
+     public static void readProperties(JTerminal terminal){
         OutputStream out = null;
         Path configPath = Paths.get(PATH);
         if(!Files.exists(configPath)){
             try{
                 out= new FileOutputStream(FILENAME);
-
-                properties.setProperty("font-size", "16");
 
 
                 properties.store(out, null);
@@ -49,22 +77,14 @@ public class PropertiesManager{
                 }
             }
         }
-        readProperties(terminal);
+        loadProperties(terminal);
     }
 
-    public static void readProperties(JTerminal terminal){
+    public static void loadProperties(JTerminal terminal){
         InputStream in = null;
         try{
             in = new FileInputStream(FILENAME);
             properties.load(in);
-
-            try{
-                int fontSize = Integer.parseInt(properties.getProperty("font-size"));
-                terminal.setFontSize(fontSize);
-            } catch (NumberFormatException e){
-                e.printStackTrace();
-            }
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -83,7 +103,7 @@ public class PropertiesManager{
         try {
             out = new FileOutputStream(FILENAME);
 
-            properties.setProperty("font-size", Integer.toString(terminal.getFontSize()));
+            //properties.setProperty("font-size", Integer.toString(terminal.getFontSize()));
 
             properties.store(out, null);
         } catch (IOException e){

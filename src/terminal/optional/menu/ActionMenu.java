@@ -1,52 +1,29 @@
 package terminal.optional.menu;
 
-import terminal.core.event.QueryEvent;
+import terminal.core.CommandAction;
 import terminal.core.JTerminal;
+import terminal.core.event.QueryEvent;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Map;
 
-public class ObjectMenu<E> extends ListMenu<E> {
+public class ActionMenu extends ListMenu<CommandAction>{
     private JTerminal terminal;
     private LinkedList<JLabel> labels;
-    private Map<String,  E> itemMap;
+    private Map<String, CommandAction> actionMap;
     private int selection;
-
     /**
-     * Creates a new instance of an ObjectMenu from a collection of objects
+     * Creates a new instance of an ActionMenu from a collection of objects
      * @param term the JTerminal on which to display the menu
-     * @param objects collection of objects to populate the menu
-     * @param direction defines menu layout
-     * @param labelFactory specifies behavior for converting objects to strings for the menu entries
-     */
-    ObjectMenu(JTerminal term, Collection<E> objects, int direction, LabelFactory<E> labelFactory){
-        this.terminal = term;
-        this.labels = new LinkedList<>();
-        itemMap = new LinkedHashMap<String, E>();
-        initLayout(terminal.getTheme());
-        for(E o:objects){
-            itemMap.put(labelFactory.toLabel(o), o);
-        }
-        makeLabels();
-        if(direction==VERTICAL){
-            initVerticalMenu();
-        } else {
-            initHorizontalMenu();
-        }
-        selectItem(0);
-    }
-
-    /**
-     * Creates a new instance of an ObjectMenu from a collection of objects
-     * @param term the JTerminal on which to display the menu
-     * @param itemMap A map of Strings to Objects, the Strings being the labels for entries in the menu
+     * @param actionMap A map of Strings to CommandActions, the Strings being the labels for entries in the menu
      * @param direction defines menu layout
      */
-    ObjectMenu(JTerminal term, Map<String, E> itemMap, int direction){
+    ActionMenu(JTerminal term, Map<String, CommandAction> actionMap, int direction){
         this.terminal = term;
         this.labels = new LinkedList<>();
-        this.itemMap = itemMap;
+        this.actionMap = actionMap;
         initLayout(terminal.getTheme());
         makeLabels();
         if(direction==VERTICAL){
@@ -98,7 +75,7 @@ public class ObjectMenu<E> extends ListMenu<E> {
     }
 
     private void makeLabels(){
-        for(String str:itemMap.keySet()){
+        for(String str: actionMap.keySet()){
             JLabel label = new JLabel(str);
             label.setBackground(terminal.getTheme().backgroundColor);
             label.setForeground(terminal.getTheme().foregroundColor);
@@ -137,7 +114,7 @@ public class ObjectMenu<E> extends ListMenu<E> {
         return selection;
     }
 
-    public E getSelectedItem(){
-        return this.itemMap.get(labels.get(selection).getText());
+    public CommandAction getSelectedItem(){
+        return this.actionMap.get(labels.get(selection).getText());
     }
 }

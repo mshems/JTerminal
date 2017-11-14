@@ -1,4 +1,4 @@
-package terminal.util;
+package terminal.core.util;
 
 public class Strings{
     public static final String COMMAND_CLEAR = "clear";

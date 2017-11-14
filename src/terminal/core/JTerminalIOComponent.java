@@ -13,8 +13,7 @@ import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 
 public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
-    private JTerminalEventListener listener;
-    private Theme theme;
+    private JTerminal listener;
     private boolean allowBackSpace;
     private final boolean multiline;
     private boolean querying;
@@ -23,26 +22,26 @@ public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
     private String defaultPrompt;
     private LinkedList<String> history;
     private int historyPointer = 0;
-    private static final int MAX_LINES = 1024;
+    private static final int MAX_LINES = 256;
     private static final int MAX_HISTORY_SIZE = 64;
     private int fontSize = 17;
 
     private static final String USER_NAME = System.getProperty("user.name");
     private static final String DEFAULT_PROMPT = USER_NAME+" ~ ";
 
-    public JTerminalIOComponent(Theme terminalTheme, boolean multi){
+    JTerminalIOComponent(JTerminal terminal, boolean multi){
         this.addKeyListener(new JTerminalKeylistener(this));
         this.remapEnterKey();
         this.remapArrows();
-        this.applyTheme(terminalTheme);
-
-        theme = terminalTheme;
+        this.setLineWrap(true);
+        listener = terminal;
         history = new LinkedList<>();
         multiline = multi;
         defaultPrompt = DEFAULT_PROMPT;
         prompt = defaultPrompt;
         querying = false;
         allowBackSpace = false;
+        applyTheme(listener.getTheme());
     }
 
     void start(){
@@ -71,9 +70,7 @@ public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
         if(this.getLineCount()>=MAX_LINES){
             int linesToRemove = this.getLineCount()-MAX_LINES;
             try {
-                this.replaceRange("",
-                        this.getLineStartOffset(0),
-                        this.getLineEndOffset(linesToRemove));
+                this.replaceRange("", this.getLineStartOffset(0), this.getLineEndOffset(linesToRemove));
             } catch (BadLocationException e){
                 e.printStackTrace();
             }
@@ -259,7 +256,7 @@ public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
 
     void setFontSize(int fontSize) {
         this.fontSize = fontSize;
-        Font f = this.theme.font;
+        Font f = listener.getTheme().font;
         this.setFont(new Font(f.getName(), f.getStyle(), fontSize));
     }
 
@@ -299,7 +296,7 @@ public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
         this.querying = querying;
     }
 
-    void setTerminalEventListener(JTerminalEventListener listener){
+    void setTerminalEventListener(JTerminal listener){
         this.listener = listener;
     }
 

@@ -2,9 +2,12 @@ package terminal.core.event;
 
 import java.awt.event.ActionEvent;
 
+/**
+ * Event object that is fired to notify that input has been received.
+ */
 public class SubmitEvent extends ActionEvent {
 
-    public SubmitEvent(Object source, int id, String command) {
-        super(source, id, command);
+    public SubmitEvent(Object source, String command) {
+        super(source, 0, command);
     }
 }

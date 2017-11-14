@@ -12,8 +12,13 @@ public class CommandTokenizer {
         this.terminal = terminal;
     }
 
-    public void tokenize(String command){
-        String[] tokens = command
+    /**
+     * Splits the input into tokens and adds them to the token buffer.
+     * This method defines the behavior of the JTerminal when making tokens out of an input String.
+     * @param input the input from the user
+     */
+    public void tokenize(String input){
+        String[] tokens = input
                 .trim()
                 .split(regex);
         Collections.addAll(terminal.getTokenBuffer(), tokens);

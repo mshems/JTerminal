@@ -1,6 +1,6 @@
 package terminal.core.behavior;
 
-import terminal.core.Command;
+import terminal.core.CommandAction;
 import terminal.core.JTerminal;
 import terminal.core.UnknownCommandException;
 
@@ -11,10 +11,16 @@ public class CommandExecutor {
         this.terminal = terminal;
     }
 
+    /**
+     * Executes the command mapped to the input token.
+     * This method defines the behavior of the JTerminal when processing input.
+     * @param token the token used to get the mapped command
+     * @throws UnknownCommandException if no command is mapped to the input token
+     */
     public void doCommand(String token) throws UnknownCommandException {
-        Command command = terminal.getCommand(token);
-        if(command != null) {
-            command.executeCommand();
+        CommandAction commandAction = terminal.getCommand(token);
+        if(commandAction != null) {
+            commandAction.executeCommand();
         } else {
             throw new UnknownCommandException(token);
         }

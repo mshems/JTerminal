@@ -44,7 +44,7 @@ public class MenuKeyListener implements KeyListener {
             }
         }
         if(e.getKeyCode() == KeyEvent.VK_ENTER){
-            menu.fireEvent(new QueryEvent(this, 1, "query-event"));
+            menu.fireEvent(new QueryEvent(this));
         }
     }
 

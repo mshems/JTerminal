@@ -34,10 +34,10 @@ public class JTerminalKeylistener implements KeyListener {
         }
         if(e.getKeyCode() == KeyEvent.VK_ENTER){
             if(inputComponent.isQuerying()){
-                inputComponent.fireEvent(new QueryEvent(inputComponent, 1, "query-event"));
+                inputComponent.fireEvent(new QueryEvent(inputComponent));
                 inputComponent.setQuerying(false);
             } else {
-                inputComponent.fireEvent(new SubmitEvent(inputComponent, 1, inputComponent.getInput()));
+                inputComponent.fireEvent(new SubmitEvent(inputComponent, inputComponent.getInput()));
             }
         }
     }

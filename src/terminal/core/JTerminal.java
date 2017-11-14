@@ -3,17 +3,20 @@ package terminal.core;
 import terminal.core.behavior.*;
 import terminal.core.event.*;
 import terminal.core.theme.*;
-import terminal.util.Strings;
+import terminal.core.util.Strings;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 
-@SuppressWarnings("unused")
+/**
+ * Command-line interface built using Swing.
+ * @version 0.1.0
+ * @author Matthew Shems
+ */
 
 public class JTerminal implements JTerminalEventListener {
-
     private final Dimension defaultWindowSize = new Dimension(800, 600);
     public final JTerminalPrinter out = new JTerminalPrinter(this);
 
@@ -27,10 +30,15 @@ public class JTerminal implements JTerminalEventListener {
     private LinkedList<String> tokenBuffer;
     private CommandMap commandMap;
 
+    //defines behavior when executing a command
     private CommandExecutor commandExecutor;
+    //defines behavior when making tokens from input
     private CommandTokenizer commandTokenizer;
+    //defines behavior when UnknownCommandExceptions are thrown
     private ExceptionHandler exceptionHandler;
+    //defines behavior on startup
     private StartBehavior startBehavior;
+    //defines behavior on closing
     private CloseBehavior closeBehavior;
 
     /**
@@ -44,20 +52,24 @@ public class JTerminal implements JTerminalEventListener {
         commandExecutor = new CommandExecutor(this);
         commandTokenizer = new CommandTokenizer(this);
         exceptionHandler = new ExceptionHandler(this);
-        theme = new Theme("default-dark");
+        this.theme = Theme.DEFAULT_DARK_THEME();
         this.title = title;
         addDefaultCommands();
         initUI();
     }
 
+    /**
+     * Initializes UI elements.
+     */
     private void initUI() {
         frame = new JFrame(title);
         frame.setPreferredSize(defaultWindowSize);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setIconImage(Toolkit.getDefaultToolkit().getImage("./resources/appicon.png"));
         frame.setLayout(new BorderLayout());
+        frame.setBackground(theme.backgroundColor);
 
-        inputComponent = new JTerminalIOComponent(theme,true);
+        inputComponent = new JTerminalIOComponent(this, true);
         inputComponent.setTerminalEventListener(this);
         outputComponent = inputComponent;
 
@@ -73,8 +85,8 @@ public class JTerminal implements JTerminalEventListener {
      */
     public synchronized void start() {
         frame.setVisible(true);
-        inputComponent.start();
         if(startBehavior !=null) startBehavior.doBehavior(this);
+        inputComponent.start();
         while (true) {
             try {
                 if(commandQueue.isEmpty()) wait();
@@ -364,21 +376,29 @@ public class JTerminal implements JTerminalEventListener {
     /**
      * Maps a command.
      * @param key the command name
-     * @param command the command to be mapped
+     * @param commandAction the command to be mapped
      * @param aliases alternate command names
      */
-    public void putCommand(String key, Command command, String...aliases) {
-        commandMap.put(key, command);
+    public void putCommand(String key, CommandAction commandAction, String...aliases) {
+        commandMap.put(key, commandAction);
         for(String a:aliases){
-            commandMap.put(a, command);
+            commandMap.put(a, commandAction);
         }
     }
 
-    public void replaceCommand(String key, Command command) { commandMap.replace(key, command); }
+    public StartBehavior getStartBehavior() { return startBehavior; }
 
-    public void removeCommand(String key, Command command) { commandMap.remove(key, command); }
+    public void setStartBehavior(StartBehavior startBehavior) { this.startBehavior = startBehavior; }
 
-    public Command getCommand(String key) { return this.commandMap.get(key); }
+    public CloseBehavior getCloseBehavior() { return closeBehavior; }
+
+    public void setCloseBehavior(CloseBehavior closeBehavior) { this.closeBehavior = closeBehavior; }
+
+    public void replaceCommand(String key, CommandAction commandAction) { commandMap.replace(key, commandAction); }
+
+    public void removeCommand(String key, CommandAction commandAction) { commandMap.remove(key, commandAction); }
+
+    public CommandAction getCommand(String key) { return this.commandMap.get(key); }
 
     public CommandMap getCommandMap() { return commandMap; }
 
@@ -423,5 +443,10 @@ public class JTerminal implements JTerminalEventListener {
 
     public Theme getTheme(){ return theme; }
 
-    public void setTheme(Theme theme){ this.theme = theme; }
+    public void setTheme(Theme theme){
+        this.theme = theme;
+        scrollPane.setBorder(BorderFactory.createLineBorder(theme.backgroundColor,8));
+        inputComponent.applyTheme(theme);
+        outputComponent.applyTheme(theme);
+    }
 }

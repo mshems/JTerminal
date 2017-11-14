@@ -7,7 +7,7 @@ public class JTerminalPrinter {
     public static final int CENTERED = 1;
     public static final int RIGHT_ALIGNED = 2;
 
-    public JTerminalPrinter(JTerminal terminal){
+    JTerminalPrinter(JTerminal terminal){
         this.terminal = terminal;
     }
 

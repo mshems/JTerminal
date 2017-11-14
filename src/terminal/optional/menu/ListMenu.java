@@ -8,6 +8,10 @@ import terminal.core.theme.ThemedComponent;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Abstract class for all list-based menus
+ * @param <E> type of entries in the menu
+ */
 public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
@@ -24,6 +28,13 @@ public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     }
 
+    /**
+     * Displays a menu on a JTerminal and returns the user's selection.
+     * @param terminal the JTerminal to display the menu
+     * @param menu the menu to be displayed
+     * @param <E> the type of the items in the menu
+     * @return the user's selection from the menu
+     */
     public static synchronized <E> E queryMenu(JTerminal terminal, ListMenu<E> menu){
         E obj = null;
         MenuKeyListener menuKeyListener = new MenuKeyListener(menu);
