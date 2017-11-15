@@ -1,11 +1,11 @@
 package terminal;
 
+import terminal.core.CommandMap;
 import terminal.core.JTerminal;
 import terminal.core.JTerminalPrinter;
 import terminal.core.theme.Theme;
 import terminal.optional.menu.ListMenu;
 import terminal.optional.menu.MenuBuilder;
-import terminal.optional.menu.ObjectMenu;
 import terminal.optional.properties.PropertiesManager;
 
 import java.util.Arrays;
@@ -26,6 +26,7 @@ public class test{
                 String themeName = ListMenu.queryMenu(terminal, new MenuBuilder()
                         .setDirection(ListMenu.HORIZONTAL)
                         .buildBasicMenu(terminal, new String[]{"light", "dark", "default"}));
+                if(themeName==null)return;
                 PropertiesManager.setProperty("theme", themeName);
                 if(themeName.equals("light")) terminal.setTheme(Theme.DEFAULT_LIGHT_THEME());
                 else if(themeName.equals("dark")) terminal.setTheme(Theme.DEFAULT_DARK_THEME());
@@ -56,13 +57,26 @@ public class test{
         //Write properties file on close
         terminal.setCloseBehavior(PropertiesManager::writeProperties);
 
-        terminal.putCommand("menu", ()->{
-            List<String> ll = Arrays.asList("1","2","3","4","5","6","7","8","9");
+        //Add commands
 
+        terminal.putCommand("print", ()->{
+            String s = terminal.queryString("Enter a string: ");
+            terminal.out.print(s);
+        });
+        terminal.putCommand("command-menu", ()->{
+            CommandMap map = (CommandMap)terminal.getCommandMap().clone();
+            map.remove("command-menu");
+            ListMenu.queryMenu(terminal, new MenuBuilder()
+                    .setDirection(ListMenu.VERTICAL)
+                    .buildActionMenu(terminal,map)).executeCommand();
+
+        });
+        terminal.putCommand("menu", ()->{
+            List<String> ll = Arrays.asList("1","2","3","4","5");
             String s = ListMenu.queryMenu(terminal, new MenuBuilder()
                     .setDirection(ListMenu.HORIZONTAL)
                     .buildObjectMenu(terminal, ll, (String str)-> "Label #"+str));
-            terminal.out.println("You selected: "+s);
+            if(s!=null) terminal.out.println("You selected: "+s);
         },"m");
         terminal.putCommand("quit", ()->{
             if(terminal.hasTokens()){

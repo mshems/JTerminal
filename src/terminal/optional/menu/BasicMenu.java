@@ -10,7 +10,6 @@ import java.awt.*;
  * Basic Menu constructed using a String array as the entries in the menu.
  */
 public class BasicMenu extends ListMenu<String> {
-    private JTerminal terminal;
     private String[] strings;
     private JLabel[] labels;
     private int selection;
@@ -22,6 +21,7 @@ public class BasicMenu extends ListMenu<String> {
      * @param direction constants ListMenu.VERTICAL or ListMenu.HORIZONTAL specifying the layout of the menu
      */
     BasicMenu(JTerminal term, String[] strings, int direction){
+        super(term);
         this.terminal = term;
         this.labels = new JLabel[strings.length];
         this.strings = strings;
@@ -35,9 +35,9 @@ public class BasicMenu extends ListMenu<String> {
     }
 
     private void initHorizontalMenu(){
-        JTextArea textArea = terminal.getOutputComponent();
+        /*JTextArea textArea = terminal.getOutputComponent();
         Font f = terminal.getTheme().font;
-        textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
+        textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));*/
 
         JPanel labelPanel = new JPanel();
         labelPanel.setBackground(terminal.getTheme().backgroundColor);
@@ -47,14 +47,14 @@ public class BasicMenu extends ListMenu<String> {
         for (JLabel l:labels) {
             labelPanel.add(l);
         }
-        this.add(textArea);
+        //this.add(textArea);
         this.add(labelPanel);
     }
 
     private void initVerticalMenu(){
-        JTextArea textArea = terminal.getOutputComponent();
+        /*JTextArea textArea = terminal.getOutputComponent();
         Font f = terminal.getTheme().font;
-        textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
+        textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));*/
 
         JPanel menuPanel = new JPanel();
         menuPanel.setBackground(terminal.getTheme().backgroundColor);
@@ -71,7 +71,7 @@ public class BasicMenu extends ListMenu<String> {
         for(JLabel l:labels){
             labelPanel.add(l);
         }
-        this.add(textArea);
+        //this.add(textArea);
         this.add(menuPanel);
     }
 
@@ -110,6 +110,7 @@ public class BasicMenu extends ListMenu<String> {
 
     @Override
     public void fireEvent (QueryEvent e){
+        if(e.cancelledQuery) cancelled = true;
         if(terminal !=null){
             terminal.queryActionPerformed(e);
         }
@@ -117,6 +118,10 @@ public class BasicMenu extends ListMenu<String> {
 
     @Override
     public String getSelectedItem(){
+        if(cancelled){
+            cancelled = false;
+            return null;
+        }
         return this.strings[selection];
     }
 
@@ -124,4 +129,6 @@ public class BasicMenu extends ListMenu<String> {
     public int getSelection() {
         return selection;
     }
+
+
 }

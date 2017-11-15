@@ -8,7 +8,6 @@ import java.awt.*;
 import java.util.*;
 
 public class ObjectMenu<E> extends ListMenu<E> {
-    private JTerminal terminal;
     private LinkedList<JLabel> labels;
     private Map<String,  E> itemMap;
     private int selection;
@@ -21,6 +20,7 @@ public class ObjectMenu<E> extends ListMenu<E> {
      * @param labelFactory specifies behavior for converting objects to strings for the menu entries
      */
     ObjectMenu(JTerminal term, Collection<E> objects, int direction, LabelFactory<E> labelFactory){
+        super(term);
         this.terminal = term;
         this.labels = new LinkedList<>();
         itemMap = new LinkedHashMap<String, E>();
@@ -44,6 +44,7 @@ public class ObjectMenu<E> extends ListMenu<E> {
      * @param direction defines menu layout
      */
     ObjectMenu(JTerminal term, Map<String, E> itemMap, int direction){
+        super(term);
         this.terminal = term;
         this.labels = new LinkedList<>();
         this.itemMap = itemMap;
@@ -58,26 +59,26 @@ public class ObjectMenu<E> extends ListMenu<E> {
     }
 
     private void initHorizontalMenu(){
-        JTextArea textArea = terminal.getOutputComponent();
-        Font f = terminal.getTheme().font;
-        textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
+        //JTextArea textArea = terminal.getOutputComponent();
+        //Font f = terminal.getTheme().font;
+        //textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
 
         JPanel labelPanel = new JPanel();
         labelPanel.setBackground(terminal.getTheme().backgroundColor);
         labelPanel.setForeground(terminal.getTheme().foregroundColor);
-        labelPanel.setLayout(new FlowLayout());
+        labelPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         for(JLabel l:labels){
             labelPanel.add(l);
         }
-        this.add(textArea);
+        //this.add(textArea);
         this.add(labelPanel);
     }
 
     private void initVerticalMenu(){
-        JTextArea textArea=terminal.getOutputComponent();
+        /*JTextArea textArea=terminal.getOutputComponent();
         Font f = terminal.getTheme().font;
-        textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
+        textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));*/
 
         JPanel menuPanel = new JPanel();
         menuPanel.setBackground(terminal.getTheme().backgroundColor);
@@ -93,7 +94,7 @@ public class ObjectMenu<E> extends ListMenu<E> {
         for(JLabel l:labels){
             labelPanel.add(l);
         }
-        this.add(textArea);
+        //this.add(textArea);
         this.add(menuPanel);
     }
 
@@ -110,12 +111,15 @@ public class ObjectMenu<E> extends ListMenu<E> {
         }
     }
 
+    @Override
     public void selectItem(int n){
         selection = n;
         labels.get(selection).setForeground(terminal.getTheme().backgroundColor);
         labels.get(selection).setBackground(terminal.getTheme().highlightColor);
         labels.get(selection).setBorder(BorderFactory.createLineBorder(terminal.getTheme().highlightColor, 3));
     }
+
+    @Override
     public void deselectItem(){
         labels.get(selection).setBackground(terminal.getTheme().backgroundColor);
         labels.get(selection).setForeground(terminal.getTheme().foregroundColor);
@@ -123,21 +127,31 @@ public class ObjectMenu<E> extends ListMenu<E> {
 
     }
 
+    @Override
     public void fireEvent (QueryEvent e){
+        if(e.cancelledQuery) cancelled = true;
         if(terminal !=null){
             terminal.queryActionPerformed(e);
         }
     }
 
+    @Override
     public int getNumLabels(){
         return labels.size();
     }
 
+    @Override
     public int getSelection() {
         return selection;
     }
 
+    @Override
     public E getSelectedItem(){
-        return this.itemMap.get(labels.get(selection).getText());
+        if(cancelled){
+            cancelled = false;
+            return null;
+        } else {
+            return this.itemMap.get(labels.get(selection).getText());
+        }
     }
 }

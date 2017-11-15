@@ -15,6 +15,8 @@ import java.awt.*;
 public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
+    protected JTerminal terminal;
+    protected boolean cancelled = false;
 
     public abstract E getSelectedItem();
     public abstract int getSelection();
@@ -23,9 +25,13 @@ public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
     public abstract int getNumLabels();
     public abstract void fireEvent(QueryEvent e);
 
+    ListMenu(JTerminal t){
+            this.terminal=t;
+    }
+
     void initLayout(Theme theme){
         this.applyTheme(theme);
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setLayout(new FlowLayout(FlowLayout.LEFT));
     }
 
     /**
@@ -41,23 +47,38 @@ public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
         terminal.getInputComponent().removeKeyListener(terminal.getInputComponent().getKeyListeners()[0]);
         terminal.getInputComponent().addKeyListener(menuKeyListener);
         terminal.getInputComponent().setEditable(false);
-        terminal.getScrollPane().setViewportView(menu);
-        terminal.getScrollPane().getViewport().setViewPosition(new Point(0,terminal.getOutputComponent().getHeight()));
-        menu.addKeyListener(menuKeyListener);
+        terminal.getScrollPaneView().add(menu);
+        //terminal.getTextPanel().revalidate();
+        terminal.getFrame().revalidate();
+        terminal.getScrollPane().repaint();
+        terminal.getScrollPane().getViewport().setViewPosition(new Point(0, terminal.getScrollPane().getHeight()));
         menu.requestFocusInWindow();
+        menu.addKeyListener(menuKeyListener);
         try {
             terminal.wait();
             obj = menu.getSelectedItem();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        terminal.getFrame().remove(menu);
         terminal.getInputComponent().removeKeyListener(menuKeyListener);
         terminal.getInputComponent().addKeyListener(new JTerminalKeylistener(terminal.getInputComponent()));
         terminal.getInputComponent().setEditable(true);
-        terminal.getScrollPane().setViewportView(terminal.getOutputComponent());
+        terminal.getScrollPaneView().remove(menu);
+        terminal.getFrame().revalidate();
+        terminal.getScrollPane().repaint();
+        terminal.getScrollPane().getViewport().setViewPosition(new Point(0, terminal.getScrollPane().getHeight()));
         terminal.getOutputComponent().requestFocusInWindow();
         return obj;
+    }
+
+    @Override
+    public Dimension getPreferredSize(){
+        return new Dimension(terminal.getOutputComponent().getPreferredSize().width, super.getPreferredSize().height);
+    }
+
+    @Override
+    public Dimension getMaximumSize(){
+        return new Dimension(terminal.getOutputComponent().getPreferredSize().width, super.getPreferredSize().height);
     }
 
     @Override

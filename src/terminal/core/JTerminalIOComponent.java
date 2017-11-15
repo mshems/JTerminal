@@ -45,6 +45,7 @@ public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
     }
 
     void start(){
+        this.setSize(getPreferredSize());
         this.setEditable(true);
         this.prompt();
         this.advanceCaret();
@@ -298,6 +299,17 @@ public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
 
     void setTerminalEventListener(JTerminal listener){
         this.listener = listener;
+    }
+
+    @Override
+    public Dimension getPreferredSize(){
+        return new Dimension(listener.getScrollPaneView().getWidth()-8, this.getLineCount()*getGraphics().getFontMetrics().getHeight());
+    }
+
+    @Override
+    public Dimension getMaximumSize(){
+        //return this.getPreferredSize();
+        return new Dimension(listener.getScrollPaneView().getWidth()-8, this.getPreferredSize().height);
     }
 
     @Override

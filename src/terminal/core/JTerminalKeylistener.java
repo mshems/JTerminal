@@ -40,6 +40,10 @@ public class JTerminalKeylistener implements KeyListener {
                 inputComponent.fireEvent(new SubmitEvent(inputComponent, inputComponent.getInput()));
             }
         }
+        if(e.getKeyCode() == KeyEvent.VK_ESCAPE && inputComponent.isQuerying()){
+            inputComponent.fireEvent(new QueryEvent(inputComponent, true));
+            inputComponent.setQuerying(false);
+        }
     }
 
     @Override

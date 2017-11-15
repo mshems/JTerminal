@@ -26,7 +26,7 @@ public class MenuBuilder{
     public <E> ObjectMenu<E> buildObjectMenu(JTerminal terminal, Map<String, E> map){
         return new ObjectMenu<>(terminal, map, this.direction);
     }
-    
+
     public <E> ObjectMenu<E> buildObjectMenu(JTerminal terminal, Collection<E> list, LabelFactory<E> labelFactory){
         return new ObjectMenu<>(terminal, list, this.direction, labelFactory);
     }

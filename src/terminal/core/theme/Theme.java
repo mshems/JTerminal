@@ -23,14 +23,13 @@ public class Theme implements Serializable{
     public Color highlightColor;
     public Font font;
 
-    public Theme(String themeName){
-        this.themeName = themeName;
-        this.font = DEFAULT_FONT_MONO;
+    public Theme(String name){
+        themeName = name;
+        font = DEFAULT_FONT_MONO;
         backgroundColor = Color.BLACK;
         foregroundColor = Color.WHITE;
         caretColor = Color.WHITE;
         highlightColor = Color.WHITE;
-
     }
 
     public static Theme DEFAULT_THEME(){

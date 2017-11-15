@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.Map;
 
 public class ActionMenu extends ListMenu<CommandAction>{
-    private JTerminal terminal;
     private LinkedList<JLabel> labels;
     private Map<String, CommandAction> actionMap;
     private int selection;
@@ -21,6 +20,7 @@ public class ActionMenu extends ListMenu<CommandAction>{
      * @param direction defines menu layout
      */
     ActionMenu(JTerminal term, Map<String, CommandAction> actionMap, int direction){
+        super(term);
         this.terminal = term;
         this.labels = new LinkedList<>();
         this.actionMap = actionMap;
@@ -35,9 +35,9 @@ public class ActionMenu extends ListMenu<CommandAction>{
     }
 
     private void initHorizontalMenu(){
-        JTextArea textArea = terminal.getOutputComponent();
+        /*JTextArea textArea = terminal.getOutputComponent();
         Font f = terminal.getTheme().font;
-        textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
+        textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));*/
 
         JPanel labelPanel = new JPanel();
         labelPanel.setBackground(terminal.getTheme().backgroundColor);
@@ -47,15 +47,15 @@ public class ActionMenu extends ListMenu<CommandAction>{
         for(JLabel l:labels){
             labelPanel.add(l);
         }
-        this.add(textArea);
+        //this.add(textArea);
         this.add(labelPanel);
     }
 
     private void initVerticalMenu(){
-        JTextArea textArea=terminal.getOutputComponent();
+        /*JTextArea textArea=terminal.getOutputComponent();
         Font f = terminal.getTheme().font;
         textArea.setFont(new Font(f.getName(), f.getStyle(), terminal.getFontSize()));
-
+*/
         JPanel menuPanel = new JPanel();
         menuPanel.setBackground(terminal.getTheme().backgroundColor);
         menuPanel.setForeground(terminal.getTheme().foregroundColor);
@@ -70,7 +70,7 @@ public class ActionMenu extends ListMenu<CommandAction>{
         for(JLabel l:labels){
             labelPanel.add(l);
         }
-        this.add(textArea);
+        //this.add(textArea);
         this.add(menuPanel);
     }
 
@@ -87,12 +87,14 @@ public class ActionMenu extends ListMenu<CommandAction>{
         }
     }
 
+    @Override
     public void selectItem(int n){
         selection = n;
         labels.get(selection).setForeground(terminal.getTheme().backgroundColor);
         labels.get(selection).setBackground(terminal.getTheme().highlightColor);
         labels.get(selection).setBorder(BorderFactory.createLineBorder(terminal.getTheme().highlightColor, 3));
     }
+    @Override
     public void deselectItem(){
         labels.get(selection).setBackground(terminal.getTheme().backgroundColor);
         labels.get(selection).setForeground(terminal.getTheme().foregroundColor);
@@ -100,21 +102,30 @@ public class ActionMenu extends ListMenu<CommandAction>{
 
     }
 
+    @Override
     public void fireEvent (QueryEvent e){
+        if(e.cancelledQuery) cancelled = true;
         if(terminal !=null){
             terminal.queryActionPerformed(e);
         }
     }
 
+    @Override
     public int getNumLabels(){
         return labels.size();
     }
 
+    @Override
     public int getSelection() {
         return selection;
     }
 
+    @Override
     public CommandAction getSelectedItem(){
+        if(cancelled){
+            cancelled = false;
+            return null;
+        }
         return this.actionMap.get(labels.get(selection).getText());
     }
 }

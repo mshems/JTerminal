@@ -1,5 +1,6 @@
 package terminal.core;
 
+import org.jetbrains.annotations.NotNull;
 import terminal.core.behavior.*;
 import terminal.core.event.*;
 import terminal.core.theme.*;
@@ -16,19 +17,22 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author Matthew Shems
  */
 
-public class JTerminal implements JTerminalEventListener {
+public class JTerminal implements JTerminalEventListener, ThemedComponent {
     private final Dimension defaultWindowSize = new Dimension(800, 600);
     public final JTerminalPrinter out = new JTerminalPrinter(this);
 
     private String title;
     private Theme theme;
     private JFrame frame;
+    private IOContainerPanel textPanel;
     private JScrollPane scrollPane;
     private JTerminalIOComponent inputComponent;
     private JTerminalIOComponent outputComponent;
     private LinkedBlockingQueue<String> commandQueue;
     private LinkedList<String> tokenBuffer;
     private CommandMap commandMap;
+    private JPanel scrollPaneView;
+    private boolean cancelledQuery;
 
     //defines behavior when executing a command
     private CommandExecutor commandExecutor;
@@ -62,6 +66,8 @@ public class JTerminal implements JTerminalEventListener {
      * Initializes UI elements.
      */
     private void initUI() {
+        //System.setProperty("awt.useSystemAAFontSettings","false");
+        //System.setProperty("swing.aatext", "false");
         frame = new JFrame(title);
         frame.setPreferredSize(defaultWindowSize);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -69,14 +75,33 @@ public class JTerminal implements JTerminalEventListener {
         frame.setLayout(new BorderLayout());
         frame.setBackground(theme.backgroundColor);
 
+        scrollPane = new JScrollPane();
+        scrollPane.setWheelScrollingEnabled(true);
+        //scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        //scrollPane.setBackground(Color.RED);
+
+        scrollPaneView = new JPanel();
+        scrollPaneView.setLayout(new BoxLayout(scrollPaneView, BoxLayout.Y_AXIS));
+        scrollPaneView.setBackground(theme.backgroundColor);
+        //scrollPaneView.setBackground(Color.GREEN);
+
         inputComponent = new JTerminalIOComponent(this, true);
         inputComponent.setTerminalEventListener(this);
         outputComponent = inputComponent;
 
-        scrollPane = new JScrollPane(outputComponent);
-        scrollPane.setBorder(BorderFactory.createLineBorder(theme.backgroundColor,8));
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        textPanel = new IOContainerPanel(outputComponent);
+        FlowLayout flowLayout = new FlowLayout(FlowLayout.LEFT);
+        flowLayout.setHgap(0);
+        flowLayout.setVgap(0);
+        textPanel.setLayout(flowLayout);
+        textPanel.setBackground(theme.backgroundColor);
+        //textPanel.setBackground(Color.BLUE);
+
+        textPanel.add(outputComponent);
+        scrollPaneView.add(textPanel);
+        scrollPane.setViewportView(scrollPaneView);
         frame.add(scrollPane, BorderLayout.CENTER);
+
         frame.pack();
     }
 
@@ -175,6 +200,7 @@ public class JTerminal implements JTerminalEventListener {
      * Waits for and then reads input from user.
      * @return <code>String</code> input from user
      */
+    @NotNull
     private synchronized String nextInput(){
         String input = "";
         inputComponent.setQuerying(true);
@@ -241,14 +267,14 @@ public class JTerminal implements JTerminalEventListener {
         synchronized (this) {
             try {
                 this.wait();
-                input = inputComponent.getInput();
+                input = inputComponent.getInput().trim();
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
         }
         inputComponent.resetPrompt();
         newLine();
-        return input.trim();
+        return input;
     }
 
     /**
@@ -354,6 +380,7 @@ public class JTerminal implements JTerminalEventListener {
      * Notifies that input has been recieved, then puts the input into the command queue and command history.
      * @param e event recieved
      */
+    @Override
     public synchronized void submitActionPerformed(SubmitEvent e) {
         this.notifyAll();
         try {
@@ -369,6 +396,7 @@ public class JTerminal implements JTerminalEventListener {
      * Notifies that input has been recieved as response to a query.
      * @param e
      */
+    @Override
     public synchronized void queryActionPerformed(QueryEvent e) {
         this.notifyAll();
     }
@@ -441,11 +469,22 @@ public class JTerminal implements JTerminalEventListener {
         if(inputComponent!=outputComponent) this.outputComponent.setFontSize(fontSize);
     }
 
+    public JPanel getScrollPaneView() {
+        return scrollPaneView;
+    }
+
     public Theme getTheme(){ return theme; }
 
     public void setTheme(Theme theme){
         this.theme = theme;
+        this.applyTheme(this.theme);
+    }
+
+    @Override
+    public void applyTheme(Theme theme) {
         scrollPane.setBorder(BorderFactory.createLineBorder(theme.backgroundColor,8));
+        scrollPaneView.setBackground(theme.backgroundColor);
+        textPanel.setBackground(theme.backgroundColor);
         inputComponent.applyTheme(theme);
         outputComponent.applyTheme(theme);
     }

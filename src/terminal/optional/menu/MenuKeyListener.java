@@ -46,6 +46,11 @@ public class MenuKeyListener implements KeyListener {
         if(e.getKeyCode() == KeyEvent.VK_ENTER){
             menu.fireEvent(new QueryEvent(this));
         }
+
+        if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+            menu.cancelled = true;
+            menu.fireEvent(new QueryEvent(this, true));
+        }
     }
 
     @Override
