@@ -1,6 +1,6 @@
 # JTerminal
 A standalone, customizable, command-line interface built with Swing.
-## Usage
+## Basic Usage
 ### Creation & Setup:
 Creating a new terminal:
 > Terminal terminal = new Terminal( "window-title" );
@@ -13,3 +13,5 @@ Set a new default prompt:
 
 Start the terminal:
 > terminal.start( );
+
+Full documentation to come.
