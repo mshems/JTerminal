@@ -66,8 +66,6 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
      * Initializes UI elements.
      */
     private void initUI() {
-        //System.setProperty("awt.useSystemAAFontSettings","false");
-        //System.setProperty("swing.aatext", "false");
         frame = new JFrame(title);
         frame.setPreferredSize(defaultWindowSize);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -77,7 +75,7 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
 
         scrollPane = new JScrollPane();
         scrollPane.setWheelScrollingEnabled(true);
-        //scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         //scrollPane.setBackground(Color.RED);
 
         scrollPaneView = new JPanel();
@@ -149,7 +147,19 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
     }
 
     /**
-     * Returns the nextInput token in the token buffer.
+     * Returns the next input token in the token buffer.
+     * @return <code>String</code> token at top of token buffer.
+     */
+    public String peekToken(){
+        if(hasTokens()){
+            return tokenBuffer.peek();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Returns and consumes the next input token in the token buffer.
      * @return <code>String</code> token at top of token buffer.
      */
     public String nextToken(){
@@ -161,7 +171,7 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
     }
 
     /**
-     * Returns the nextInput token in the token buffer as an <code>int</code>.
+     * Returns consumes the next input token in the token buffer as an <code>int</code>.
      * @return <code>int</code> token from buffer
      * @throws IllegalTokenException if token can not be parsed into an <code>int</code>
      */
@@ -175,7 +185,7 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
     }
 
     /**
-     * Returns the nextInput token in the token buffer as a <code>double</code>.
+     * Returns consumes the next input token in the token buffer as a <code>double</code>.
      * @return <code>double</code> token from buffer
      * @throws IllegalTokenException if token can not be parsed into a <code>double</code>
      */
@@ -189,7 +199,7 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
     }
 
     /**
-     * Returns the nextInput token in the token buffer as a <code>boolean</code>.
+     * Returns consumes the next input token in the token buffer as a <code>boolean</code>.
      * @return <code>boolean</code> token from buffer
      */
     public boolean nextBooleanToken(){
@@ -255,7 +265,7 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
     }
 
     /**
-     * Displays a prompt, then waits for an reads input from the user.
+     * Displays a prompt, then waits for and reads input from the user.
      * @param queryPrompt the text to be displayed
      * @return input from user as a <code>String</code>
      */
@@ -278,7 +288,7 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
     }
 
     /**
-     * Displays a prompt, then waits for an reads input from the user.
+     * Displays a prompt, then waits for and reads input from the user.
      * @param queryPrompt the text to be displayed
      * @return input from user as a <code>String</code>
      */
@@ -294,7 +304,7 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
     }
 
     /**
-     * Displays a prompt, then waits for an reads input from the user.
+     * Displays a prompt, then waits for and reads input from the user.
      * @param queryPrompt the text to be displayed
      * @return input from user as an <code>int</code>
      */
@@ -309,7 +319,7 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
     }
 
     /**
-     * Displays a prompt, then waits for an reads input from the user.
+     * Displays a prompt, then waits for and reads input from the user.
      * @param queryPrompt the text to be displayed
      * @return input from user as a <code>double</code>
      */
@@ -324,7 +334,7 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
     }
 
     /**
-     * Displays a prompt, then waits for an reads input from the user.
+     * Displays a prompt, then waits for and reads input from the user.
      * @param queryPrompt the text to be displayed
      * @return input from user as a <code>boolean</code>
      */
@@ -333,7 +343,7 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
     }
 
     /**
-     * Displays a prompt, then waits for an reads input from the user.
+     * Displays a prompt, then waits for and reads input from the user.
      * @param queryPrompt the text to be displayed
      * @return true if input is "y" or "yes" (non-case-sensitive)
      */
@@ -376,7 +386,7 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
     }
 
     /**
-     * Method fired after recieving a <code>SubmitEvent</code>.
+     * Method fired after receiving a <code>SubmitEvent</code>.
      * Notifies that input has been recieved, then puts the input into the command queue and command history.
      * @param e event recieved
      */
