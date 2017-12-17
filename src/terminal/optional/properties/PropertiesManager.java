@@ -12,7 +12,7 @@ import java.util.Properties;
 
 public class PropertiesManager{
     private static final String COMMAND_CONFIG = "terminal-config";
-    private static final String FILENAME = "terminal-config.properties";
+    private static final String FILENAME = "jterminal.properties";
     private static final String PATH = "./"+FILENAME;
     private static Properties properties;
     private static PropertiesConfigCommand propertiesConfigCommand = new PropertiesConfigCommand();
@@ -20,7 +20,6 @@ public class PropertiesManager{
     public static void addPropertiesManager(JTerminal terminal){
         properties = new Properties();
         terminal.putCommand(COMMAND_CONFIG, ()->propertiesConfigCommand.config(terminal, properties));
-
         addProperty("font-size", "16", () -> {
             if (!terminal.hasTokens()) return;
             try {
@@ -32,7 +31,6 @@ public class PropertiesManager{
             }
         });
     }
-
 
     public static String getProperty(String propertyName){
         return properties.getProperty(propertyName);
@@ -62,8 +60,6 @@ public class PropertiesManager{
         if(!Files.exists(configPath)){
             try{
                 out= new FileOutputStream(FILENAME);
-
-
                 properties.store(out, null);
             } catch (IOException e){
                 e.printStackTrace();
@@ -80,7 +76,7 @@ public class PropertiesManager{
         loadProperties(terminal);
     }
 
-    public static void loadProperties(JTerminal terminal){
+    private static void loadProperties(JTerminal terminal){
         InputStream in = null;
         try{
             in = new FileInputStream(FILENAME);
@@ -102,9 +98,6 @@ public class PropertiesManager{
         OutputStream out = null;
         try {
             out = new FileOutputStream(FILENAME);
-
-            //properties.setProperty("font-size", Integer.toString(terminal.getFontSize()));
-
             properties.store(out, null);
         } catch (IOException e){
             e.printStackTrace();

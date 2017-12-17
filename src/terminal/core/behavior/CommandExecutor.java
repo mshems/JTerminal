@@ -21,9 +21,10 @@ public class CommandExecutor {
         CommandAction commandAction = terminal.getCommand(token);
         if(commandAction != null) {
             commandAction.executeCommand();
+            terminal.clearBuffer();
         } else {
+            terminal.clearBuffer();
             throw new UnknownCommandException(token);
         }
-        terminal.clearBuffer();
     }
 }

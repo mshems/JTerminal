@@ -1,6 +1,6 @@
 package terminal.core;
 
 
-public interface CommandAction {
-    void executeCommand();
+public interface CommandAction extends Action {
+
 }

@@ -8,6 +8,7 @@ import terminal.core.util.Strings;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -17,7 +18,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author Matthew Shems
  */
 
-public class JTerminal implements JTerminalEventListener, ThemedComponent {
+public class JTerminal extends AbstractTerminal implements JTerminalEventListener, ThemedComponent {
     private final Dimension defaultWindowSize = new Dimension(800, 600);
     public final JTerminalPrinter out = new JTerminalPrinter(this);
 
@@ -56,7 +57,7 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
         commandExecutor = new CommandExecutor(this);
         commandTokenizer = new CommandTokenizer(this);
         exceptionHandler = new ExceptionHandler(this);
-        this.theme = Theme.DEFAULT_DARK_THEME();
+        this.theme = Theme.DEFAULT_THEME();
         this.title = title;
         addDefaultCommands();
         initUI();
@@ -68,14 +69,28 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
     private void initUI() {
         frame = new JFrame(title);
         frame.setPreferredSize(defaultWindowSize);
+        frame.setMinimumSize(new Dimension(400,400));
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setIconImage(Toolkit.getDefaultToolkit().getImage("./resources/appicon.png"));
         frame.setLayout(new BorderLayout());
         frame.setBackground(theme.backgroundColor);
 
         scrollPane = new JScrollPane();
         scrollPane.setWheelScrollingEnabled(true);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        //disable arrow key scrolling
+        scrollPane.getActionMap().put("unitScrollRight", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+            }});
+        scrollPane.getActionMap().put("unitScrollDown", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+            }});
+        scrollPane.getActionMap().put("unitScrollUp", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+            }});
+        scrollPane.setBorder(BorderFactory.createLineBorder(theme.backgroundColor,8));
         //scrollPane.setBackground(Color.RED);
 
         scrollPaneView = new JPanel();
@@ -87,9 +102,9 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
         inputComponent.setTerminalEventListener(this);
         outputComponent = inputComponent;
 
-        textPanel = new IOContainerPanel(outputComponent);
+        textPanel = new IOContainerPanel(outputComponent, scrollPaneView);
         FlowLayout flowLayout = new FlowLayout(FlowLayout.LEFT);
-        flowLayout.setHgap(0);
+        flowLayout.setHgap(4);
         flowLayout.setVgap(0);
         textPanel.setLayout(flowLayout);
         textPanel.setBackground(theme.backgroundColor);
@@ -107,8 +122,8 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
      * Starts the JTerminal. If <code>startBehavior != null</code>, executes that behavior first.
      */
     public synchronized void start() {
-        frame.setVisible(true);
         if(startBehavior !=null) startBehavior.doBehavior(this);
+        frame.setVisible(true);
         inputComponent.start();
         while (true) {
             try {
@@ -134,6 +149,8 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
      * Closes the JTerminal. If <code>closeBehavior != null</code>, executes that behavior before disposing.
      */
     public void close(){
+        this.clearBuffer();
+        this.clear();
         if(closeBehavior!=null) closeBehavior.doBehavior(this);
         frame.dispose();
     }
@@ -424,14 +441,6 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
         }
     }
 
-    public StartBehavior getStartBehavior() { return startBehavior; }
-
-    public void setStartBehavior(StartBehavior startBehavior) { this.startBehavior = startBehavior; }
-
-    public CloseBehavior getCloseBehavior() { return closeBehavior; }
-
-    public void setCloseBehavior(CloseBehavior closeBehavior) { this.closeBehavior = closeBehavior; }
-
     public void replaceCommand(String key, CommandAction commandAction) { commandMap.replace(key, commandAction); }
 
     public void removeCommand(String key, CommandAction commandAction) { commandMap.remove(key, commandAction); }
@@ -452,6 +461,14 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
 
     public void setExceptionHandler(ExceptionHandler exceptionHandler) { this.exceptionHandler = exceptionHandler; }
 
+    public StartBehavior getStartBehavior() { return startBehavior; }
+
+    public void setStartBehavior(StartBehavior startBehavior) { this.startBehavior = startBehavior; }
+
+    public CloseBehavior getCloseBehavior() { return closeBehavior; }
+
+    public void setCloseBehavior(CloseBehavior closeBehavior) { this.closeBehavior = closeBehavior; }
+
     public JTerminalIOComponent getInputComponent() { return inputComponent; }
 
     public JTerminalIOComponent getOutputComponent() { return outputComponent; }
@@ -459,6 +476,10 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
     public JFrame getFrame() { return frame;}
 
     public JScrollPane getScrollPane(){ return scrollPane; }
+
+    public IOContainerPanel getTextPanel() {
+        return textPanel;
+    }
 
     public String getDefaultPrompt(){ return inputComponent.getDefaultPrompt(); }
 
@@ -490,6 +511,10 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
         this.applyTheme(this.theme);
     }
 
+    public void setAppIcon(String pathToIcon){
+        frame.setIconImage(Toolkit.getDefaultToolkit().getImage(pathToIcon));
+    }
+
     @Override
     public void applyTheme(Theme theme) {
         scrollPane.setBorder(BorderFactory.createLineBorder(theme.backgroundColor,8));
@@ -497,5 +522,6 @@ public class JTerminal implements JTerminalEventListener, ThemedComponent {
         textPanel.setBackground(theme.backgroundColor);
         inputComponent.applyTheme(theme);
         outputComponent.applyTheme(theme);
+        //frame.repaint();
     }
 }

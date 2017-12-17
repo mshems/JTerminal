@@ -41,7 +41,8 @@ public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
         prompt = defaultPrompt;
         querying = false;
         allowBackSpace = false;
-        applyTheme(listener.getTheme());
+        this.applyTheme(listener.getTheme());
+        this.setMargin(new Insets(4,4,4,4));
     }
 
     void start(){
@@ -133,7 +134,11 @@ public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
         if(history.size()>=MAX_HISTORY_SIZE){
             history.removeLast();
         }
-        history.addFirst(command);
+        if(history.isEmpty()){
+            history.addFirst(command);
+        } else if(!history.getFirst().equals(command) && !command.isEmpty()) {
+            history.addFirst(command);
+        }
         historyPointer = 0;
     }
 
@@ -303,13 +308,12 @@ public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
 
     @Override
     public Dimension getPreferredSize(){
-        return new Dimension(listener.getScrollPaneView().getWidth()-8, this.getLineCount()*getGraphics().getFontMetrics().getHeight());
+        return new Dimension(listener.getScrollPaneView().getWidth()-4, super.getPreferredSize().height);
     }
 
     @Override
     public Dimension getMaximumSize(){
-        //return this.getPreferredSize();
-        return new Dimension(listener.getScrollPaneView().getWidth()-8, this.getPreferredSize().height);
+        return new Dimension(listener.getScrollPaneView().getWidth(), super.getPreferredSize().height);
     }
 
     @Override

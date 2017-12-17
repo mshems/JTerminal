@@ -4,22 +4,22 @@ import javax.swing.*;
 import java.awt.*;
 
 public class IOContainerPanel extends JPanel{
-    private JComponent component;
+    private JTerminalIOComponent component;
+    private JComponent parentComponent;
 
-    IOContainerPanel(JComponent c){
+    IOContainerPanel(JTerminalIOComponent c, JComponent parentComponent){
         this.component = c;
-        //this.add(c);
+        this.parentComponent = parentComponent;
+    }
+
+
+    @Override
+    public Dimension getPreferredSize(){
+        return component.getPreferredSize();
     }
 
     @Override
     public Dimension getMaximumSize() {
         return component.getMaximumSize();
-        //return new Dimension(ioComponent.getMaximumSize().width, ioComponent.getMaximumSize().height);
-    }
-
-    @Override
-    public Dimension getPreferredSize(){
-        return new Dimension(component.getPreferredSize().width, component.getPreferredSize().height);
-        //return component.getPreferredSize();
     }
 }

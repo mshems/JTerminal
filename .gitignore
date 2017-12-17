@@ -5,6 +5,7 @@ out
 src/terminal/Testing.java
 *.properties
 META-INF
+*.sh
 
 # Windows image file caches
 Thumbs.db

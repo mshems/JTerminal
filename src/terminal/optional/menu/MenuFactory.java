@@ -4,13 +4,12 @@ import terminal.core.CommandAction;
 import terminal.core.JTerminal;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
-public class MenuBuilder{
+public class MenuFactory {
     private int direction = ListMenu.HORIZONTAL;
 
-    public MenuBuilder setDirection(int direction){
+    public MenuFactory setDirection(int direction){
         this.direction = direction;
         return this;
     }

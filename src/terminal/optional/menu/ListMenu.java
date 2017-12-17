@@ -4,6 +4,7 @@ import terminal.core.*;
 import terminal.core.event.QueryEvent;
 import terminal.core.theme.Theme;
 import terminal.core.theme.ThemedComponent;
+import terminal.optional.menu.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +17,8 @@ public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
     protected JTerminal terminal;
-    protected boolean cancelled = false;
+    protected String menuTitle;
+    boolean cancelled = false;
 
     public abstract E getSelectedItem();
     public abstract int getSelection();
@@ -36,38 +38,38 @@ public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
 
     /**
      * Displays a menu on a JTerminal and returns the user's selection.
-     * @param terminal the JTerminal to display the menu
      * @param menu the menu to be displayed
      * @param <E> the type of the items in the menu
      * @return the user's selection from the menu
      */
-    public static synchronized <E> E queryMenu(JTerminal terminal, ListMenu<E> menu){
+    public static synchronized <E> E queryMenu(ListMenu<E> menu){
         E obj = null;
         MenuKeyListener menuKeyListener = new MenuKeyListener(menu);
-        terminal.getInputComponent().removeKeyListener(terminal.getInputComponent().getKeyListeners()[0]);
-        terminal.getInputComponent().addKeyListener(menuKeyListener);
-        terminal.getInputComponent().setEditable(false);
-        terminal.getScrollPaneView().add(menu);
-        //terminal.getTextPanel().revalidate();
-        terminal.getFrame().revalidate();
-        terminal.getScrollPane().repaint();
-        terminal.getScrollPane().getViewport().setViewPosition(new Point(0, terminal.getScrollPane().getHeight()));
+        if(menu.menuTitle!=null) menu.terminal.out.println(menu.menuTitle);
+        //terminal.getInputComponent().removeKeyListener(terminal.getInputComponent().getKeyListeners()[0]);
+        menu.terminal.getInputComponent().addKeyListener(menuKeyListener);
+        menu.terminal.getInputComponent().setEditable(false);
+        menu.terminal.getScrollPaneView().add(menu);
+        menu.terminal.getScrollPaneView().revalidate();
+        menu.terminal.getFrame().revalidate();
+        menu.terminal.getScrollPane().repaint();
+        menu.terminal.getScrollPane().getViewport().setViewPosition(new Point(0, menu.terminal.getScrollPane().getHeight()));
         menu.requestFocusInWindow();
         menu.addKeyListener(menuKeyListener);
         try {
-            terminal.wait();
+            menu.terminal.wait();
             obj = menu.getSelectedItem();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        terminal.getInputComponent().removeKeyListener(menuKeyListener);
-        terminal.getInputComponent().addKeyListener(new JTerminalKeylistener(terminal.getInputComponent()));
-        terminal.getInputComponent().setEditable(true);
-        terminal.getScrollPaneView().remove(menu);
-        terminal.getFrame().revalidate();
-        terminal.getScrollPane().repaint();
-        terminal.getScrollPane().getViewport().setViewPosition(new Point(0, terminal.getScrollPane().getHeight()));
-        terminal.getOutputComponent().requestFocusInWindow();
+        menu.terminal.getInputComponent().removeKeyListener(menuKeyListener);
+        //terminal.getInputComponent().addKeyListener(new JTerminalKeylistener(terminal.getInputComponent()));
+        menu.terminal.getInputComponent().setEditable(true);
+        menu.terminal.getScrollPaneView().remove(menu);
+        menu.terminal.getFrame().revalidate();
+        menu.terminal.getScrollPane().repaint();
+        menu.terminal.getScrollPane().getViewport().setViewPosition(new Point(0, menu.terminal.getScrollPane().getHeight()));
+        menu.terminal.getInputComponent().requestFocusInWindow();
         return obj;
     }
 
@@ -85,5 +87,9 @@ public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
     public void applyTheme(Theme theme){
         this.setBackground(theme.backgroundColor);
         this.setForeground(theme.foregroundColor);
+    }
+
+    public void setMenuTitle(String title){
+        this.menuTitle = title;
     }
 }
