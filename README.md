@@ -1,17 +1,8 @@
 # JTerminal
-A standalone, customizable, command-line interface built with Swing.
-## Basic Usage
-### Creation & Setup:
-Creating a new terminal:
-> Terminal terminal = new Terminal( "window-title" );
-
-Add command mappings:
-> terminal.putCommand("key", ( )->{ \<YOUR CODE HERE\> });
-
-Set a new default prompt:
-> terminal.setDefaultPrompt( "prompt" );
-
-Start the terminal:
-> terminal.start( );
-
-Full documentation to come.
+A standalone, customizable, command-line interface built using Swing. Developed for use with CharacterCommand, but is fully modular.
+### Features:
+- Simple command-action mapping
+- Easy-to-use methods for parsing and requesting input
+- Preference management, loading and writing to file
+- Color theme management and customization from XML files
+- Flexible menus
