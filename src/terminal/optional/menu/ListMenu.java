@@ -3,6 +3,7 @@ package terminal.optional.menu;
 import terminal.core.*;
 import terminal.core.theme.Theme;
 import terminal.core.theme.ThemedComponent;
+import terminal.core.util.Strings;
 
 import javax.swing.*;
 import java.awt.*;
@@ -79,6 +80,7 @@ public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
         try {
             menu.terminal.wait();
             obj = menu.returnSelection();
+            menu.terminal.newLine();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -90,7 +92,6 @@ public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
         menu.terminal.getScrollPane().repaint();
         menu.terminal.getScrollPane().getViewport().setViewPosition(new Point(0, menu.terminal.getScrollPane().getHeight()));
         menu.terminal.getInputComponent().requestFocusInWindow();
-        menu.terminal.newLine();
         return obj;
     }
 

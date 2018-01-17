@@ -1,5 +1,6 @@
 package terminal;
 
+import terminal.core.CommandAction;
 import terminal.core.CommandMap;
 import terminal.core.JTerminal;
 import terminal.core.JTerminalPrinter;
@@ -36,14 +37,15 @@ public class test{
         //Add theme property and config command action
         PropertiesManager.addProperty("theme","default", ()-> {
             //Theme selection menu
-            String themeName = ListMenu.queryMenu(new MenuFactory()
+            MenuReturnObject<String> m = ListMenu.queryMenu(new MenuFactory()
                     .setDirection(ListMenu.HORIZONTAL)
-                    .buildObjectMenu(terminal, ThemeManager.themeList, (str) -> str))
-                    .returnObject;
-            if (themeName == null) return;
-            //Set theme property and load selected theme
-            PropertiesManager.setProperty("theme", themeName);
-            ThemeManager.setTheme(terminal, themeName);
+                    .buildObjectMenu(terminal, ThemeManager.themeList, (str) -> str));
+            if(m!=null && m.returnObject!=null) {
+                String themeName = m.returnObject;
+                //Set theme property and load selected theme
+                PropertiesManager.setProperty("theme", themeName);
+                ThemeManager.setTheme(terminal, themeName);
+            }
         });
 
         //Define startup behavior
@@ -67,7 +69,7 @@ public class test{
         //Define close behavior
         terminal.setCloseBehavior(PropertiesManager::writeProperties);
 
-//Add commands:
+    //Add commands:
         //Display basic theme properties
         terminal.putCommand("theme", ()->{
             Theme theme = terminal.getTheme();
@@ -88,22 +90,26 @@ public class test{
         terminal.putCommand("command-menu", ()->{
             CommandMap map = (CommandMap)terminal.getCommandMap().clone();
             map.remove("command-menu");
-            ListMenu.queryMenu(new MenuFactory()
+            MenuReturnObject<CommandAction> m = ListMenu.queryMenu(new MenuFactory()
                     .setDirection(ListMenu.VERTICAL)
-                    .buildActionMenu(terminal, map))
-                    .returnObject
-                    .executeCommand();
+                    .buildActionMenu(terminal, map));
+            if(m!=null && m.returnObject!=null) {
+                m.returnObject.executeCommand();
+            }
         });
 
         //Show a basic example of a menu
         terminal.putCommand("menu", ()->{
             List<String> ll = Arrays.asList("1","2","3","4","5");
             MenuReturnObject<String> o = ListMenu.queryMenu(new MenuFactory()
+                    .setTitle("Test Menu |")
                     .setDirection(ListMenu.HORIZONTAL)
                     .buildObjectMenu(terminal, ll, (str)->"Label #"+str));
-            String s = o.returnObject;
-            if(o.modifiers == ListMenu.SHIFT) terminal.out.println("SHIFT");
-            if(s!=null) terminal.out.println("You selected: "+s);
+            if(o!=null && o.returnObject!=null) {
+                String s = o.returnObject;
+                if (o.modifiers == ListMenu.SHIFT) terminal.out.println("SHIFT");
+                terminal.out.println("You selected: " + s);
+            }
         },"m");
 
         //Quit command with options
@@ -121,11 +127,6 @@ public class test{
                 }
             }
         },"q");
-
-        /*terminal.putCommand("restart", ()->{
-            terminal.close();
-            terminal.start();
-        });*/
 
         //Start the terminal
         terminal.start();

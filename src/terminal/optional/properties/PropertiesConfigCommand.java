@@ -3,29 +3,33 @@ package terminal.optional.properties;
 import terminal.core.CommandAction;
 import terminal.core.CommandMap;
 import terminal.core.JTerminal;
+import terminal.optional.menu.ListMenu;
+import terminal.optional.menu.MenuFactory;
+import terminal.optional.menu.MenuReturnObject;
 
 import java.util.Properties;
 
 public class PropertiesConfigCommand {
-    private CommandMap commandMap;
+    private CommandMap configCommandMap;
 
     PropertiesConfigCommand(){
-        commandMap = new CommandMap();
+        configCommandMap = new CommandMap();
+        //configCommandMap.put("cancel", ()->{});
     }
 
     void addCustomBehavior(String propertyName, CommandAction commandAction){
-        commandMap.put(propertyName, commandAction);
+        configCommandMap.put(propertyName, commandAction);
     }
 
     void removeCustomBehavior(String propertyName){
-        commandMap.remove(propertyName);
+        configCommandMap.remove(propertyName);
     }
 
     void config(JTerminal terminal, Properties properties) {
         if (terminal.hasTokens()) {
             String propertyName = terminal.nextToken();
-            if (commandMap.get(propertyName) != null) {
-                commandMap.get(propertyName).executeCommand();
+            if (configCommandMap.get(propertyName) != null) {
+                configCommandMap.get(propertyName).executeCommand();
             } else {
                 if (properties.getProperty(propertyName) != null && terminal.hasTokens()) {
                     properties.setProperty(propertyName, terminal.nextToken());
@@ -33,7 +37,14 @@ public class PropertiesConfigCommand {
             }
             PropertiesManager.writeProperties(terminal);
         } else {
-            terminal.out.println("No property specified");
+            MenuReturnObject<CommandAction> m = ListMenu.queryMenu(
+                    new MenuFactory()
+                    .setDirection(ListMenu.VERTICAL)
+                    .buildActionMenu(terminal, configCommandMap));
+            if(m!=null && m.returnObject!=null){
+                m.returnObject.executeCommand();
+            }
+            //terminal.out.println("No property specified");
         }
     }
 }

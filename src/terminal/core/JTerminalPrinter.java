@@ -55,7 +55,7 @@ public class JTerminalPrinter {
         terminal.getOutputComponent().println(o.toString());
     }
 
-    public void println(String str, int PRINT_FORMAT) {
+    /*public void println(String str, int PRINT_FORMAT) {
         switch (PRINT_FORMAT) {
             case LEFT_ALIGNED:
                 terminal.getOutputComponent().print(str);
@@ -70,5 +70,5 @@ public class JTerminalPrinter {
                 terminal.getOutputComponent().print(str);
                 break;
         }
-    }
+    }*/
 }

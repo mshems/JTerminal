@@ -21,14 +21,17 @@ public class PropertiesManager{
         properties = new Properties();
         terminal.putCommand(COMMAND_CONFIG, ()->propertiesConfigCommand.config(terminal, properties));
         addProperty("font-size", "16", () -> {
-            if (!terminal.hasTokens()) return;
-            try {
-                int fontSize = terminal.nextIntToken();
-                properties.setProperty("font-size", "" + fontSize);
-                terminal.setFontSize(fontSize);
+            Integer fontSize = null;
+            if (!terminal.hasTokens()) {
+                fontSize = terminal.queryInteger("Font size: ");
+            } else try {
+                fontSize = terminal.nextIntToken();
             } catch (IllegalTokenException e) {
                 terminal.out.println("ERROR: Font size must be an integer");
+                return;
             }
+            properties.setProperty("font-size", "" + fontSize);
+            terminal.setFontSize(fontSize);
         });
     }
 

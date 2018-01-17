@@ -60,10 +60,6 @@ public class resume {
                 t.setFontSize(terminal.getTheme().font.getSize());
             }
 
-            //Splash screen displaying version number
-            t.out.println("Matthew Shems", JTerminalPrinter.CENTERED);
-            t.out.println("---------------", JTerminalPrinter.CENTERED);
-            t.out.println("Enter 'about' for an overview, or 'help' for help", JTerminalPrinter.CENTERED);
         });
 
         //Define close behavior
@@ -88,8 +84,6 @@ public class resume {
 
         terminal.replaceCommand("clear", ()->{
             terminal.clear();
-            terminal.out.println("Matthew Shems", JTerminalPrinter.CENTERED);
-            terminal.out.println("---------------", JTerminalPrinter.CENTERED);
         });
 
         //Quit command with options
