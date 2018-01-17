@@ -370,7 +370,7 @@ public class JTerminal extends AbstractTerminal implements JTerminalEventListene
         }
     }
 
-    private void newLine() {
+    public void newLine() {
         inputComponent.newLine();
     }
 

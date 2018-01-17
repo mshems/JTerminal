@@ -114,6 +114,7 @@ public class ObjectMenu<E> extends ListMenu<E> {
         if(e.cancelledQuery) cancelled = true;
         if(terminal !=null){
             terminal.queryActionPerformed(e);
+            modifiers = e.modifiers;
         }
     }
 
@@ -128,12 +129,12 @@ public class ObjectMenu<E> extends ListMenu<E> {
     }
 
     @Override
-    public E getSelectedItem(){
+    public MenuReturnObject<E> returnSelection(){
         if(cancelled){
             cancelled = false;
             return null;
         } else {
-            return this.itemMap.get(labels.get(selection).getText());
+            return new MenuReturnObject<E>(this.itemMap.get(labels.get(selection).getText()), modifiers);
         }
     }
 }

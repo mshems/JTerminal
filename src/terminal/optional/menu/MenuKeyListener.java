@@ -1,7 +1,5 @@
 package terminal.optional.menu;
 
-import terminal.core.event.QueryEvent;
-
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -44,12 +42,17 @@ public class MenuKeyListener implements KeyListener {
             }
         }
         if(e.getKeyCode() == KeyEvent.VK_ENTER){
-            menu.fireEvent(new MenuQueryEvent(this));
+            int mod =0;
+            if(e.isShiftDown()) mod = ListMenu.SHIFT;
+            if(e.isControlDown()) mod = ListMenu.CTRL;
+            if(e.isShiftDown() && e.isControlDown()) mod = ListMenu.CTRL_SHIFT;
+            menu.fireEvent(new MenuQueryEvent(this, mod));
         }
 
         if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+            int mod=0;
             menu.cancelled = true;
-            menu.fireEvent(new MenuQueryEvent(this, true));
+            menu.fireEvent(new MenuQueryEvent(this, mod, true));
         }
     }
 

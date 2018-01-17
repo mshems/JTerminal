@@ -36,7 +36,7 @@ public class resume {
             String themeName = ListMenu.queryMenu(new MenuFactory()
                     .setDirection(ListMenu.VERTICAL)
                     .setTitle("Themes:")
-                    .buildObjectMenu(terminal, ThemeManager.themeList, (str) -> str));
+                    .buildObjectMenu(terminal, ThemeManager.themeList, (str) -> str)).returnObject;
             if (themeName == null) return;
             //Set theme property and load selected theme
             PropertiesManager.setProperty("theme", themeName);

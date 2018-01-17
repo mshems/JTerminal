@@ -99,16 +99,17 @@ public class BasicMenu extends ListMenu<String> {
         if(e.cancelledQuery) cancelled = true;
         if(terminal !=null){
             terminal.queryActionPerformed(e);
+            modifiers = e.modifiers;
         }
     }
 
     @Override
-    public String getSelectedItem(){
+    public MenuReturnObject<String> returnSelection(){
         if(cancelled){
             cancelled = false;
             return null;
         }
-        return this.strings[selection];
+        return new MenuReturnObject<>(this.strings[selection], modifiers);
     }
 
     @Override

@@ -4,6 +4,7 @@ import terminal.core.CommandMap;
 import terminal.core.JTerminal;
 import terminal.core.JTerminalPrinter;
 import terminal.core.theme.Theme;
+import terminal.optional.menu.MenuReturnObject;
 import terminal.optional.theme.ThemeManager;
 import terminal.optional.menu.ListMenu;
 import terminal.optional.menu.MenuFactory;
@@ -37,7 +38,8 @@ public class test{
             //Theme selection menu
             String themeName = ListMenu.queryMenu(new MenuFactory()
                     .setDirection(ListMenu.HORIZONTAL)
-                    .buildObjectMenu(terminal, ThemeManager.themeList, (str) -> str));
+                    .buildObjectMenu(terminal, ThemeManager.themeList, (str) -> str))
+                    .returnObject;
             if (themeName == null) return;
             //Set theme property and load selected theme
             PropertiesManager.setProperty("theme", themeName);
@@ -60,10 +62,6 @@ public class test{
                 //Default to font size in theme
                 t.setFontSize(terminal.getTheme().font.getSize());
             }
-
-            //Splash screen displaying version number
-            t.out.println("JTerminal v0.1.2", JTerminalPrinter.CENTERED);
-            t.out.println("------------------------", JTerminalPrinter.CENTERED);
         });
 
         //Define close behavior
@@ -93,16 +91,18 @@ public class test{
             ListMenu.queryMenu(new MenuFactory()
                     .setDirection(ListMenu.VERTICAL)
                     .buildActionMenu(terminal, map))
-                .executeCommand();
-
+                    .returnObject
+                    .executeCommand();
         });
 
         //Show a basic example of a menu
         terminal.putCommand("menu", ()->{
             List<String> ll = Arrays.asList("1","2","3","4","5");
-            String s = ListMenu.queryMenu(new MenuFactory()
+            MenuReturnObject<String> o = ListMenu.queryMenu(new MenuFactory()
                     .setDirection(ListMenu.HORIZONTAL)
                     .buildObjectMenu(terminal, ll, (str)->"Label #"+str));
+            String s = o.returnObject;
+            if(o.modifiers == ListMenu.SHIFT) terminal.out.println("SHIFT");
             if(s!=null) terminal.out.println("You selected: "+s);
         },"m");
 

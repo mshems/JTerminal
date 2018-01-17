@@ -91,6 +91,7 @@ public class ActionMenu extends ListMenu<CommandAction>{
         if(e.cancelledQuery) cancelled = true;
         if(terminal !=null){
             terminal.queryActionPerformed(e);
+            modifiers = e.modifiers;
         }
     }
 
@@ -105,11 +106,11 @@ public class ActionMenu extends ListMenu<CommandAction>{
     }
 
     @Override
-    public CommandAction getSelectedItem(){
+    public MenuReturnObject<CommandAction> returnSelection(){
         if(cancelled){
             cancelled = false;
             return null;
         }
-        return this.actionMap.get(labels.get(selection).getText());
+        return new MenuReturnObject<>(this.actionMap.get(labels.get(selection).getText()), modifiers);
     }
 }

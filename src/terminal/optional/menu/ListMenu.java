@@ -1,10 +1,8 @@
 package terminal.optional.menu;
 
 import terminal.core.*;
-import terminal.core.event.QueryEvent;
 import terminal.core.theme.Theme;
 import terminal.core.theme.ThemedComponent;
-import terminal.optional.menu.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,14 +16,15 @@ public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
     public static final int VERTICAL = 1;
 
     public static final int SHIFT = 1;
-    public static final int ALT = 1;
-    public static final int CTRL = 1;
+    public static final int CTRL = 2;
+    public static final int CTRL_SHIFT = 3;
 
     protected JTerminal terminal;
     String menuTitle;
     boolean cancelled = false;
+    int modifiers = 0;
 
-    public abstract E getSelectedItem();
+    public abstract MenuReturnObject<E> returnSelection();
     public abstract int getSelection();
     public abstract void selectItem(int index);
     public abstract void deselectItem();
@@ -62,8 +61,8 @@ public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
      * @param <E> the type of the items in the menu
      * @return the user's selection from the menu
      */
-    public static synchronized <E> E queryMenu(ListMenu<E> menu){
-        E obj = null;
+    public static synchronized <E> MenuReturnObject<E> queryMenu(ListMenu<E> menu){
+        MenuReturnObject<E> obj = null;
         MenuKeyListener menuKeyListener = new MenuKeyListener(menu);
         //terminal.getInputComponent().removeKeyListener(terminal.getInputComponent().getKeyListeners()[0]);
         menu.terminal.getInputComponent().addKeyListener(menuKeyListener);
@@ -79,7 +78,7 @@ public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
         menu.addKeyListener(menuKeyListener);
         try {
             menu.terminal.wait();
-            obj = menu.getSelectedItem();
+            obj = menu.returnSelection();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -91,6 +90,7 @@ public abstract class ListMenu<E> extends JPanel implements ThemedComponent {
         menu.terminal.getScrollPane().repaint();
         menu.terminal.getScrollPane().getViewport().setViewPosition(new Point(0, menu.terminal.getScrollPane().getHeight()));
         menu.terminal.getInputComponent().requestFocusInWindow();
+        menu.terminal.newLine();
         return obj;
     }
 
