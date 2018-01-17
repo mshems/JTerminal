@@ -1,6 +1,5 @@
 package terminal.core;
 
-import org.jetbrains.annotations.NotNull;
 import terminal.core.behavior.*;
 import terminal.core.event.*;
 import terminal.core.theme.*;
@@ -18,6 +17,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author Matthew Shems
  */
 
+@SuppressWarnings("unused")
+
 public class JTerminal extends AbstractTerminal implements JTerminalEventListener, ThemedComponent {
     private final Dimension defaultWindowSize = new Dimension(800, 600);
     public final JTerminalPrinter out = new JTerminalPrinter(this);
@@ -33,7 +34,6 @@ public class JTerminal extends AbstractTerminal implements JTerminalEventListene
     private LinkedList<String> tokenBuffer;
     private CommandMap commandMap;
     private JPanel scrollPaneView;
-    private boolean cancelledQuery;
 
     //defines behavior when executing a command
     private CommandExecutor commandExecutor;
@@ -80,16 +80,13 @@ public class JTerminal extends AbstractTerminal implements JTerminalEventListene
         //disable arrow key scrolling
         scrollPane.getActionMap().put("unitScrollRight", new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-            }});
+            public void actionPerformed(ActionEvent actionEvent) { }});
         scrollPane.getActionMap().put("unitScrollDown", new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-            }});
+            public void actionPerformed(ActionEvent actionEvent) { }});
         scrollPane.getActionMap().put("unitScrollUp", new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-            }});
+            public void actionPerformed(ActionEvent actionEvent) { }});
         scrollPane.setBorder(BorderFactory.createLineBorder(theme.backgroundColor,8));
         //scrollPane.setBackground(Color.RED);
 
@@ -227,9 +224,8 @@ public class JTerminal extends AbstractTerminal implements JTerminalEventListene
      * Waits for and then reads input from user.
      * @return <code>String</code> input from user
      */
-    @NotNull
     private synchronized String nextInput(){
-        String input = "";
+        String input="";
         inputComponent.setQuerying(true);
         inputComponent.setCaretPosition(inputComponent.getText().length());
         int position = inputComponent.getCaretPosition();
@@ -389,7 +385,7 @@ public class JTerminal extends AbstractTerminal implements JTerminalEventListene
     /**
      * Maps default commands.
      */
-    public void addDefaultCommands() {
+    private void addDefaultCommands() {
         commandMap.put("", ()->{});
         commandMap.put(Strings.COMMAND_CLEAR, this::clear);
     }
@@ -421,7 +417,7 @@ public class JTerminal extends AbstractTerminal implements JTerminalEventListene
     /**
      * Method fired after recieving a <code>QueryEvent</code>.
      * Notifies that input has been recieved as response to a query.
-     * @param e
+     * @param e QueryEvent recieved
      */
     @Override
     public synchronized void queryActionPerformed(QueryEvent e) {

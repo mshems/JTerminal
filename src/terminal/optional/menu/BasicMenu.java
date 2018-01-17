@@ -20,12 +20,12 @@ public class BasicMenu extends ListMenu<String> {
      * @param strings String array of the menu's entries
      * @param direction constants ListMenu.VERTICAL or ListMenu.HORIZONTAL specifying the layout of the menu
      */
-    BasicMenu(JTerminal term, String[] strings, int direction){
-        super(term);
-        this.terminal = term;
+    BasicMenu(String title, JTerminal term, String[] strings, int direction){
+        super(title, term);
         this.labels = new JLabel[strings.length];
         this.strings = strings;
         initLayout(terminal.getTheme());
+
         if(direction==VERTICAL){
             initVerticalMenu();
         } else {
@@ -44,20 +44,15 @@ public class BasicMenu extends ListMenu<String> {
             labelPanel.add(l);
             labelPanel.add(Box.createHorizontalStrut(3));
         }
+
         this.add(labelPanel);
     }
 
     private void initVerticalMenu(){
-        /*JPanel menuPanel = new JPanel();
-        menuPanel.setBackground(terminal.getTheme().backgroundColor);
-        menuPanel.setForeground(terminal.getTheme().foregroundColor);
-        menuPanel.setLayout(new FlowLayout(FlowLayout.LEFT));*/
-
         JPanel labelPanel = new JPanel();
         labelPanel.setBackground(terminal.getTheme().backgroundColor);
         labelPanel.setForeground(terminal.getTheme().foregroundColor);
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
-        //menuPanel.add(labelPanel);
 
         makeLabels();
         for(JLabel l:labels){
@@ -100,7 +95,7 @@ public class BasicMenu extends ListMenu<String> {
     }
 
     @Override
-    public void fireEvent (QueryEvent e){
+    public void fireEvent (MenuQueryEvent e){
         if(e.cancelledQuery) cancelled = true;
         if(terminal !=null){
             terminal.queryActionPerformed(e);

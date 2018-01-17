@@ -9,7 +9,7 @@ import java.awt.event.KeyListener;
 public class JTerminalKeylistener implements KeyListener {
     private final JTerminalIOComponent inputComponent;
 
-    public JTerminalKeylistener(JTerminalIOComponent inputComponent){
+    JTerminalKeylistener(JTerminalIOComponent inputComponent){
         this.inputComponent = inputComponent;
     }
 

@@ -19,9 +19,8 @@ public class ObjectMenu<E> extends ListMenu<E> {
      * @param direction defines menu layout
      * @param labelFactory specifies behavior for converting objects to strings for the menu entries
      */
-    ObjectMenu(JTerminal term, Collection<E> objects, int direction, LabelFactory<E> labelFactory){
-        super(term);
-        this.terminal = term;
+    ObjectMenu(String title, JTerminal term, Collection<E> objects, int direction, LabelFactory<E> labelFactory){
+        super(title, term);
         this.labels = new LinkedList<>();
         itemMap = new LinkedHashMap<String, E>();
         initLayout(terminal.getTheme());
@@ -43,13 +42,13 @@ public class ObjectMenu<E> extends ListMenu<E> {
      * @param itemMap A map of Strings to Objects, the Strings being the labels for entries in the menu
      * @param direction defines menu layout
      */
-    ObjectMenu(JTerminal term, Map<String, E> itemMap, int direction){
-        super(term);
-        this.terminal = term;
+    ObjectMenu(String title, JTerminal term, Map<String, E> itemMap, int direction){
+        super(title, term);
         this.labels = new LinkedList<>();
         this.itemMap = itemMap;
         initLayout(terminal.getTheme());
         makeLabels();
+
         if(direction==VERTICAL){
             initVerticalMenu();
         } else {
@@ -58,12 +57,12 @@ public class ObjectMenu<E> extends ListMenu<E> {
         selectItem(0);
     }
 
+
     private void initHorizontalMenu(){
         JPanel labelPanel = new JPanel();
         labelPanel.setBackground(terminal.getTheme().backgroundColor);
         labelPanel.setForeground(terminal.getTheme().foregroundColor);
         labelPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-
         for(JLabel l:labels){
             labelPanel.add(l);
             labelPanel.add(Box.createHorizontalStrut(3));
@@ -72,17 +71,10 @@ public class ObjectMenu<E> extends ListMenu<E> {
     }
 
     private void initVerticalMenu(){
-        /*JPanel menuPanel = new JPanel();
-        menuPanel.setBackground(terminal.getTheme().backgroundColor);
-        menuPanel.setForeground(terminal.getTheme().foregroundColor);
-        menuPanel.setLayout(new FlowLayout(FlowLayout.LEFT));*/
-
         JPanel labelPanel = new JPanel();
         labelPanel.setBackground(terminal.getTheme().backgroundColor);
         labelPanel.setForeground(terminal.getTheme().foregroundColor);
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
-        //menuPanel.add(labelPanel);
-
         for(JLabel l:labels){
             labelPanel.add(l);
         }
@@ -115,11 +107,10 @@ public class ObjectMenu<E> extends ListMenu<E> {
         labels.get(selection).setBackground(terminal.getTheme().backgroundColor);
         labels.get(selection).setForeground(terminal.getTheme().foregroundColor);
         labels.get(selection).setBorder(BorderFactory.createLineBorder(terminal.getTheme().backgroundColor, 3));
-
     }
 
     @Override
-    public void fireEvent (QueryEvent e){
+    public void fireEvent (MenuQueryEvent e){
         if(e.cancelledQuery) cancelled = true;
         if(terminal !=null){
             terminal.queryActionPerformed(e);

@@ -10,8 +10,4 @@ public class Strings{
 
     public static final String MATCH_YES = "yes";
     public static final String MATCH_YES_SHORT = "y";
-    public static final String MATCH_TRUE = "true";
-    public static final String MATCH_TRUE_SHORT = "t";
-    public static final String MATCH_FALSE = "false";
-    public static final String MATCH_FALSE_SHORT = "f";
 }

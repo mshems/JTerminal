@@ -44,12 +44,12 @@ public class MenuKeyListener implements KeyListener {
             }
         }
         if(e.getKeyCode() == KeyEvent.VK_ENTER){
-            menu.fireEvent(new QueryEvent(this));
+            menu.fireEvent(new MenuQueryEvent(this));
         }
 
         if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
             menu.cancelled = true;
-            menu.fireEvent(new QueryEvent(this, true));
+            menu.fireEvent(new MenuQueryEvent(this, true));
         }
     }
 

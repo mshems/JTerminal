@@ -19,9 +19,8 @@ public class ActionMenu extends ListMenu<CommandAction>{
      * @param actionMap A map of Strings to CommandActions, the Strings being the labels for entries in the menu
      * @param direction defines menu layout
      */
-    ActionMenu(JTerminal term, Map<String, CommandAction> actionMap, int direction){
-        super(term);
-        this.terminal = term;
+    ActionMenu(String title, JTerminal term, Map<String, CommandAction> actionMap, int direction){
+        super(title, term);
         this.labels = new LinkedList<>();
         this.actionMap = actionMap;
         initLayout(terminal.getTheme());
@@ -39,7 +38,7 @@ public class ActionMenu extends ListMenu<CommandAction>{
         labelPanel.setBackground(terminal.getTheme().backgroundColor);
         labelPanel.setForeground(terminal.getTheme().foregroundColor);
         labelPanel.setLayout(new FlowLayout());
-
+        if(menuTitle!=null) this.add(new JLabel(menuTitle));
         for(JLabel l:labels){
             labelPanel.add(l);
             labelPanel.add(Box.createHorizontalStrut(3));
@@ -48,16 +47,10 @@ public class ActionMenu extends ListMenu<CommandAction>{
     }
 
     private void initVerticalMenu(){
-        /*JPanel menuPanel = new JPanel();
-        menuPanel.setBackground(terminal.getTheme().backgroundColor);
-        menuPanel.setForeground(terminal.getTheme().foregroundColor);
-        menuPanel.setLayout(new FlowLayout(FlowLayout.LEFT));*/
-
         JPanel labelPanel = new JPanel();
         labelPanel.setBackground(terminal.getTheme().backgroundColor);
         labelPanel.setForeground(terminal.getTheme().foregroundColor);
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
-        //menuPanel.add(labelPanel);
 
         for(JLabel l:labels){
             labelPanel.add(l);
@@ -94,7 +87,7 @@ public class ActionMenu extends ListMenu<CommandAction>{
     }
 
     @Override
-    public void fireEvent (QueryEvent e){
+    public void fireEvent (MenuQueryEvent e){
         if(e.cancelledQuery) cancelled = true;
         if(terminal !=null){
             terminal.queryActionPerformed(e);

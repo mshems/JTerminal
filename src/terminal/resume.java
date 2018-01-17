@@ -4,18 +4,16 @@ import terminal.core.CommandMap;
 import terminal.core.JTerminal;
 import terminal.core.JTerminalPrinter;
 import terminal.core.theme.Theme;
-import terminal.optional.theme.ThemeManager;
 import terminal.optional.menu.ListMenu;
 import terminal.optional.menu.MenuFactory;
 import terminal.optional.properties.PropertiesManager;
-import terminal.optional.theme.ThemeXMLHandler;
+import terminal.optional.theme.ThemeManager;
 
-import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 
 
-public class test{
+public class resume {
     /**
      * Creates and runs a JTerminal for demonstration
      * @param args command-line arguments
@@ -33,10 +31,11 @@ public class test{
         PropertiesManager.addPropertiesManager(terminal);
 
         //Add theme property and config command action
-        PropertiesManager.addProperty("theme","default", ()-> {
+        PropertiesManager.addProperty("theme","matrix", ()-> {
             //Theme selection menu
             String themeName = ListMenu.queryMenu(new MenuFactory()
-                    .setDirection(ListMenu.HORIZONTAL)
+                    .setDirection(ListMenu.VERTICAL)
+                    .setTitle("Themes:")
                     .buildObjectMenu(terminal, ThemeManager.themeList, (str) -> str));
             if (themeName == null) return;
             //Set theme property and load selected theme
@@ -62,49 +61,36 @@ public class test{
             }
 
             //Splash screen displaying version number
-            t.out.println("JTerminal v0.1.2", JTerminalPrinter.CENTERED);
-            t.out.println("------------------------", JTerminalPrinter.CENTERED);
+            t.out.println("Matthew Shems", JTerminalPrinter.CENTERED);
+            t.out.println("---------------", JTerminalPrinter.CENTERED);
+            t.out.println("Enter 'about' for an overview, or 'help' for help", JTerminalPrinter.CENTERED);
         });
 
         //Define close behavior
         terminal.setCloseBehavior(PropertiesManager::writeProperties);
 
 //Add commands:
-        //Display basic theme properties
-        terminal.putCommand("theme", ()->{
-            Theme theme = terminal.getTheme();
-            terminal.out.println("Name: "+theme.themeName);
-            terminal.out.println(String.format("Background: #%02x%02x%02x", theme.backgroundColor.getRed(),
-                    theme.backgroundColor.getGreen(), theme.backgroundColor.getBlue()));
-            terminal.out.println(String.format("Foreground: #%02x%02x%02x", theme.foregroundColor.getRed(),
-                    theme.foregroundColor.getGreen(), theme.foregroundColor.getBlue()));
+        terminal.putCommand("about", ()->{
+                terminal.out.println("About:");
         });
 
-        //Input then display a string
-        terminal.putCommand("print", ()->{
-            String s = terminal.queryString("Enter a string: ");
-            terminal.out.print(s);
+        terminal.putCommand("contact", ()->{
+            terminal.out.println("Contact Info:");
         });
 
-        //Show a menu of all top-level commands
-        terminal.putCommand("command-menu", ()->{
-            CommandMap map = (CommandMap)terminal.getCommandMap().clone();
-            map.remove("command-menu");
-            ListMenu.queryMenu(new MenuFactory()
-                    .setDirection(ListMenu.VERTICAL)
-                    .buildActionMenu(terminal, map))
-                .executeCommand();
-
+        terminal.putCommand("exp", ()->{
+            terminal.out.println("Experience:");
         });
 
-        //Show a basic example of a menu
-        terminal.putCommand("menu", ()->{
-            List<String> ll = Arrays.asList("1","2","3","4","5");
-            String s = ListMenu.queryMenu(new MenuFactory()
-                    .setDirection(ListMenu.HORIZONTAL)
-                    .buildObjectMenu(terminal, ll, (str)->"Label #"+str));
-            if(s!=null) terminal.out.println("You selected: "+s);
-        },"m");
+        terminal.putCommand("skill", ()->{
+            terminal.out.println("Skills:");
+        });
+
+        terminal.replaceCommand("clear", ()->{
+            terminal.clear();
+            terminal.out.println("Matthew Shems", JTerminalPrinter.CENTERED);
+            terminal.out.println("---------------", JTerminalPrinter.CENTERED);
+        });
 
         //Quit command with options
         terminal.putCommand("quit", ()->{

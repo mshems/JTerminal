@@ -32,6 +32,8 @@ public class PropertiesConfigCommand {
                 }
             }
             PropertiesManager.writeProperties(terminal);
+        } else {
+            terminal.out.println("No property specified");
         }
     }
 }

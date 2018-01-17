@@ -131,7 +131,7 @@ public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
     }
 
     void updateHistory(String command){
-        if(history.size()>=MAX_HISTORY_SIZE){
+        if(history.size() >= MAX_HISTORY_SIZE){
             history.removeLast();
         }
         if(history.isEmpty()){
@@ -168,14 +168,14 @@ public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)), "");
     }
 
-    public void unmapArrows(){
+    /*public void unmapArrows(){
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0)), "");
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)), "");
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)), "");
         this.getInputMap().put((KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0)), "");
-    }
+    }*/
 
-    public void remapArrows(){
+    private void remapArrows(){
         //LEFT ARROW
         this.getActionMap().put("leftArrowAction", new AbstractAction(){
             @Override
@@ -203,9 +203,10 @@ public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
         this.getActionMap().put("upArrowAction", new AbstractAction(){
             @Override
             public void actionPerformed(ActionEvent e){
-                if(!history.isEmpty() && historyPointer < history.size()){
+
+                if(!history.isEmpty() && historyPointer < history.size()) {
                     historyPointer++;
-                    setText(getText().substring(0,lastPromptPos)+history.get(historyPointer-1));
+                    setText(getText().substring(0, lastPromptPos) + history.get(historyPointer - 1));
                 }
             }
         });
@@ -220,6 +221,7 @@ public class JTerminalIOComponent extends JTextArea implements ThemedComponent {
                     setText(getText().substring(0,lastPromptPos)+history.get(historyPointer-1));
                 } else if(historyPointer == 1){
                     setText(getText().substring(0,lastPromptPos)+"");
+                    historyPointer =0;
                 }
             }
         });
